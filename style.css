@@ -24,6 +24,27 @@ function loadVoices() {
     }
 }
 
+        .word-span {
+    display: inline-block;
+    padding: 0 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Эффект при наведении */
+.word-span:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+}
+
+/* Класс, который вешается на слово при клике */
+.word-saved {
+    background-color: #fbbf24 !important; /* золотой цвет */
+    color: #000 !important;
+    font-weight: bold;
+}
+
 function showPage(id) {
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     document.getElementById('page-'+id).classList.remove('hidden');
@@ -211,4 +232,5 @@ function showToast(m) {
     const t = document.getElementById('toast');
     t.innerText = m; t.classList.remove('opacity-0');
     setTimeout(() => t.classList.add('opacity-0'), 2000);
+
 }
