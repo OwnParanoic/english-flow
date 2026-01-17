@@ -509,6 +509,6 @@ const stories4 = [
 
 // В самом низу файла data.js, после всех массивов:
 
-const stories = [...stories1, ...stories2, ...stories3, ...stories4];
+
 var allStories = [...stories1, ...stories2, ...stories3, ...stories4];
 var stories = allStories;
