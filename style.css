@@ -55,6 +55,25 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     transition: all 0.2s;
 }
 
+#lib-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.story-card {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 2rem;
+    padding: 2rem;
+    text-align: center;
+}
+
 .cat-btn.active {
     background: #5d5fef;
     border-color: #5d5fef;
@@ -82,3 +101,4 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 .animate-fade { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
