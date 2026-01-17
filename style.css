@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
     --bg: #f8fafc;
@@ -18,47 +18,68 @@ body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: var(--bg);
     color: var(--text);
+    overflow-x: hidden;
 }
 
-.card { background-color: var(--card); border: 1px solid var(--border); }
 .header-bg { background-color: var(--card); }
 
-/* Подсветка слов */
-.word-span {
-    display: inline-block;
-    padding: 0 2px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.2s;
-}
+.card { background-color: var(--card); border: 1px solid var(--border); }
 
-/* При чтении голосом */
-.word-reading {
-    background-color: #6366f1 !important;
-    color: white !important;
-    transform: scale(1.1);
-}
-
-/* Сохраненное слово */
-.word-saved {
-    border-bottom: 3px solid #fbbf24;
+/* Сетка библиотеки */
+.cat-btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 10px;
     font-weight: 800;
+    text-transform: uppercase;
+    transition: 0.3s;
+    border: 1px solid var(--border);
+    opacity: 0.6;
 }
 
-/* Стили библиотеки */
-.level-btn { border: 2px solid transparent; background: var(--card); opacity: 0.5; }
-.level-btn.active { border-color: #6366f1; opacity: 1; color: #6366f1; }
+.cat-btn.active {
+    background: #6366f1;
+    color: white;
+    opacity: 1;
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
 
 .topic-card {
     background: var(--card);
     border: 1px solid var(--border);
-    padding: 1.5rem;
-    border-radius: 1.5rem;
-    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-radius: 2rem;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    transition: 0.3s;
+    text-align: center;
 }
 
-.topic-card:hover { border-color: #6366f1; transform: translateY(-3px); }
+.topic-card:hover {
+    transform: translateY(-8px);
+    border-color: #6366f1;
+    box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15);
+}
+
+/* Синхронизация чтения */
+.word-span {
+    display: inline-block;
+    padding: 0 3px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.word-reading {
+    background-color: #6366f1 !important;
+    color: white !important;
+    transform: scale(1.15) rotate(1deg);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+}
+
+.word-saved {
+    border-bottom: 4px solid #fbbf24;
+    font-weight: 800;
+}
 
 .page-content.hidden { display: none; }
