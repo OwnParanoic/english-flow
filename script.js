@@ -15,6 +15,8 @@ const stories = [
     { title: "Great White Shark", cat: "Animals", lvl: "Medium", text: "The Great White is a large predator found in coastal waters. They have hundreds of sharp teeth and a powerful sense of smell." },
     { title: "The Blue Whale", cat: "Animals", lvl: "Hard", text: "The blue whale is the largest animal ever known to have lived on Earth. Despite their size, they feed mainly on tiny shrimp-called krill." },
     { title: "Honey Bees", cat: "Animals", lvl: "Medium", text: "Bees are essential for pollinating flowers and crops. They live in highly organized colonies led by a single queen bee." },
+    { title: "The Smart Octopus", cat: "Animals", lvl: "Medium", text: "Octopuses are incredibly intelligent. They can solve puzzles, open jars, and even camouflage themselves by changing their skin color and texture to match their surroundings." },
+    { title: "Migrating Birds", cat: "Animals", lvl: "Medium", text: "Many birds fly thousands of miles every year to find food or better weather. This is called migration. They use the Earth's magnetic field and the stars to find their way." },
 
     // SCIENCE
     { title: "Solar System", cat: "Science", lvl: "Easy", text: "Our solar system has eight planets. The Sun is at the center. Earth is the only planet known to support life." },
@@ -27,7 +29,29 @@ const stories = [
     { title: "Remote Work", cat: "Work", lvl: "Medium", text: "Many people now work from home using the internet. This offers flexibility but requires good time management skills." },
     { title: "Startup Culture", cat: "Work", lvl: "Hard", text: "Startups are small companies designed to grow fast. They often have informal offices but require long hours and hard work." },
 
-    // LIFESTYLE
+    // SPACE
+    { title: "The Red Planet", cat: "Space", lvl: "Medium", text: "Mars is often called the Red Planet because of iron oxide on its surface. NASA has sent several rovers, like Curiosity and Perseverance, to explore its dry lakes and search for signs of ancient life." },
+    { title: "Black Holes", cat: "Space", lvl: "Hard", text: "A black hole is a place in space where gravity pulls so much that even light cannot get out. The gravity is so strong because matter has been squeezed into a tiny space. This can happen when a star is dying." },
+    { title: "The Moon Landing", cat: "Space", lvl: "Easy", text: "In 1969, Neil Armstrong became the first human to step on the moon. He said, 'That's one small step for man, one giant leap for mankind.' It was a historic moment for all of humanity." },
+    { title: "Saturn's Rings", cat: "Space", lvl: "Medium", text: "Saturn is famous for its bright and complex rings. These rings are made of billions of small chunks of ice and rock, ranging in size from a grain of sand to a large house." },
+
+    // MEDICINE & HEALTH
+    { title: "How Vaccines Work", cat: "Medicine", lvl: "Hard", text: "Vaccines train your immune system to recognize and fight pathogens, such as viruses or bacteria. They introduce a tiny, harmless piece of the germ into the body so the immune system can practice fighting it." },
+    { title: "Healthy Sleep", cat: "Medicine", lvl: "Easy", text: "Sleep is very important for your brain and body. Most adults need seven to nine hours of sleep every night. Good sleep helps you learn better and keeps your heart healthy." },
+    { title: "The Human Heart", cat: "Medicine", lvl: "Medium", text: "Your heart is a muscle that pumps blood to your whole body. It beats about 100,000 times a day. To keep it strong, you should exercise regularly and eat healthy food." },
+    { title: "Discovery of Penicillin", cat: "Medicine", lvl: "Hard", text: "Alexander Fleming discovered the first antibiotic, penicillin, by accident in 1928. This discovery changed medicine forever, allowing doctors to cure infections that were once deadly." },
+
+    // PSYCHOLOGY
+    { title: "Body Language", cat: "Psychology", lvl: "Medium", text: "Non-verbal communication, or body language, makes up a huge part of how we talk to each other. Your posture, eye contact, and hand gestures can tell people if you are nervous, happy, or angry." },
+    { title: "The Placebo Effect", cat: "Psychology", lvl: "Hard", text: "The placebo effect happens when a person's health improves after taking a 'fake' treatment, like a sugar pill, simply because they believe it will work. It shows how powerful the mind is in healing." },
+
+    // HISTORY
+    { title: "The Silk Road", cat: "History", lvl: "Medium", text: "The Silk Road was an ancient network of trade routes that connected Europe and Asia. It allowed people to trade silk, spices, and even ideas and inventions between different cultures." },
+    { title: "The Vikings", cat: "History", lvl: "Medium", text: "Vikings were famous explorers and warriors from Scandinavia. They traveled across the ocean in longships and were the first Europeans to reach North America, long before Columbus." },
+
+    // TECH
+    { title: "How Wi-Fi Works", cat: "Tech", lvl: "Medium", text: "Wi-Fi uses radio waves to send information between your device and a router. It allows us to connect to the internet without any cables, making it easy to work and study from anywhere." },
+    { title: "The Future of AI", cat: "Tech", lvl: "Hard", text: "Artificial Intelligence is growing fast. In the future, AI might help doctors perform surgeries, drive cars safely, and even help us solve complex problems like climate change." },
     // LIFESTYLE
     { title: "Morning Routine", cat: "Life", lvl: "Easy", text: "Having a good morning routine can help you stay productive. Many people start their day with a glass of water and exercise." },
     { title: "Benefits of Tea", cat: "Life", lvl: "Easy", text: "Tea is the most popular drink in the world after water. Green tea is known for having many antioxidants that are good for health." }
@@ -48,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Функция рендера теперь будет автоматически создавать кнопки для ВСЕХ категорий, которые есть в списке
 function renderCategoryNav() {
+    // Получаем уникальные категории из нашего огромного списка
     const cats = ['All', ...new Set(stories.map(s => s.cat))];
     const nav = document.getElementById('cat-nav');
     nav.innerHTML = cats.map(c => `
@@ -201,6 +226,7 @@ function renderVocab() {
         </div>
     `).join('');
 }
+
 
 
 
