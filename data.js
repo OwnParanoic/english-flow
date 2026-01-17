@@ -511,4 +511,4 @@ const pack4 = [
 
 stories = [...pack1, ...pack2, ...pack3, ...pack4];
 
-console.log("Успех! Загружено текстов:", stories.length);
+console.log("Успех! Загружено текстов:",window.stories.length);
