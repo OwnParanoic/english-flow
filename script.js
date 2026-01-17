@@ -1,26 +1,21 @@
 let vocabulary = JSON.parse(localStorage.getItem('ef_vocabulary')) || [];
 let voices = [];
-let currentArt = null;
-let currentQuizWord = "";
+let currentText = "";
+let currentLevel = "A1";
+
+const topicsDB = {
+    "A1": ["My Day", "Red Apple", "Small Cat", "Big House", "My Friend", "Family Dinner", "At School", "Pizza Time", "Morning Coffee", "Blue Sky", "My Dog", "Simple Math", "Green Tree", "Summer Sun", "Winter Snow", "My Room", "Shopping List", "Fast Car", "Little Bird", "Happy Birthday", "Water Bottle", "Bread and Milk", "Doctor Visit", "Park Walk", "Bus Stop", "In the Garden", "Cook Egg", "New Shoes", "Cold Rain", "Old Book", "Phone Call", "Sea Fish", "Farm Cow", "Yellow Sun", "Nice Song"],
+    "B2": ["Modern Technology", "Climate Change", "Healthy Lifestyle", "Remote Work", "Space Exploration", "Artificial Intelligence", "World Economy", "Social Media", "Urban Life", "Mental Health", "Education System", "Global Travel", "Movie Industry", "Music Trends", "Future Cities", "Electric Vehicles", "Plastic Pollution", "Renewable Energy", "Genetic Engineering", "Deep Sea", "Volcanoes", "Ancient Rome", "History of Art", "Wildlife Safety", "Fast Fashion", "Internet Privacy", "Cryptocurrency", "Public Transport", "Olympics", "Psychology", "Space Tourism", "Nutrition", "Yoga Benefits", "Coffee Culture", "E-books"],
+    "C1": ["Geopolitical Shifts", "Quantum Computing", "Philosophical Inquiry", "Macroeconomic Stability", "Sociological Phenomena", "Ethical Dilemmas", "Linguistic Diversity", "Neuroplasticity", "Sustainability Goals", "Diplomatic Relations", "Technological Singularity", "Architectural Evolution", "Existentialism", "Cultural Appropriation", "Cognitive Dissonance", "Quantum Mechanics", "Biotechnology Ethics", "Stellar Evolution", "Post-Modernism", "Global Governance", "Resource Scarcity", "Deep Learning", "Genetic Modification", "Space Colonization", "Demographic Shifts", "Paradigm Changes", "Artificial Consciousness", "Behavioral Economics", "Cyber Warfare", "Renewable Infrastructure", "Astrophysics", "Historical Revisionism", "Microbiology", "Epistemology", "Thermodynamics"]
+};
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Восстановление темы
-    if(localStorage.getItem('ef_theme') === 'light') {
-        document.documentElement.classList.remove('dark');
-        document.getElementById('theme-toggle').innerText = '☀️';
-    }
-    
+    if(localStorage.getItem('ef_theme') === 'light') document.documentElement.classList.remove('dark');
+    filterLibrary('A1');
     window.speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
     updateUI();
-    checkImportedWords();
 });
-
-function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('ef_theme', isDark ? 'dark' : 'light');
-    document.getElementById('theme-toggle').innerText = isDark ? '🌙' : '☀️';
-}
 
 function showPage(id) {
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
@@ -29,44 +24,62 @@ function showPage(id) {
     if(id === 'practice') startVocabularyQuiz();
 }
 
-function generateAIContent() {
-    const input = document.getElementById('ai-prompt');
-    let topic = input.value.trim();
-    if(!topic) return;
-
-    document.getElementById('ai-loading').classList.remove('hidden');
-    document.getElementById('ai-result').classList.add('hidden');
-
-    setTimeout(() => {
-        currentArt = {
-            title: topic,
-            text: `Learning about ${topic.toLowerCase()} is an amazing experience. Many experts believe that ${topic.toLowerCase()} helps people develop new skills. When you study ${topic.toLowerCase()}, you open new doors for your future.`
-        };
-        renderArt();
-        document.getElementById('ai-loading').classList.add('hidden');
-        document.getElementById('ai-result').classList.remove('hidden');
-        input.value = "";
-    }, 800);
+function filterLibrary(level) {
+    currentLevel = level;
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + level).classList.add('active');
+    
+    const grid = document.getElementById('library-grid');
+    grid.innerHTML = topicsDB[level].map(t => `
+        <div class="topic-card" onclick="openTopic('${t}', '${level}')">
+            <h4 class="font-bold">${t}</h4>
+        </div>
+    `).join('');
 }
 
-function renderArt() {
-    document.getElementById('res-title').innerText = currentArt.title;
+function openTopic(topic, level) {
+    showPage('home');
+    document.getElementById('home-placeholder').classList.add('hidden');
+    document.getElementById('ai-result').classList.remove('hidden');
+    document.getElementById('res-title').innerText = topic;
+    
+    let text = "";
+    if(level === "A1") text = `This is a story about ${topic}. I like ${topic} very much. It is simple and good. Every day I see ${topic} and I feel happy. You can learn about ${topic} too.`;
+    else if(level === "B2") text = `The importance of ${topic} in our modern society cannot be underestimated. Many people believe that ${topic} provides unique opportunities for development. However, we must consider the challenges associated with ${topic} in the long term.`;
+    else text = `The conceptual framework of ${topic} necessitates a profound understanding of its underlying principles. Scholarly analysis indicates that ${topic} fundamentally alters our perception of contemporary reality, challenging established paradigms and fostering intellectual discourse.`;
+
+    currentText = text;
     const container = document.getElementById('res-text');
     container.innerHTML = "";
-    
-    currentArt.text.split(' ').forEach(word => {
+    text.split(' ').forEach((word, i) => {
         const span = document.createElement('span');
         const clean = word.toLowerCase().replace(/[^a-z]/g, '');
         span.className = "word-span";
+        span.id = `word-${i}`;
         if(vocabulary.includes(clean)) span.classList.add('word-saved');
         span.innerText = word;
-        span.onclick = (e) => {
-            saveWord(clean);
-            e.target.classList.add('word-saved');
-        };
+        span.onclick = () => { saveWord(clean); span.classList.add('word-saved'); };
         container.appendChild(span);
         container.appendChild(document.createTextNode(' '));
     });
+}
+
+function speakText() {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(currentText);
+    utterance.voice = voices[document.getElementById('voice-select').value];
+    
+    utterance.onboundary = (event) => {
+        if(event.name === 'word') {
+            document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
+            const wordIdx = currentText.substring(0, event.charIndex).split(' ').length - 1;
+            const el = document.getElementById(`word-${wordIdx}`);
+            if(el) el.classList.add('word-reading');
+        }
+    };
+    
+    utterance.onend = () => document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
+    window.speechSynthesis.speak(utterance);
 }
 
 function saveWord(w) {
@@ -83,103 +96,62 @@ function saveWord(w) {
 function addWordManually() {
     const input = document.getElementById('manual-word-input');
     const word = input.value.trim().toLowerCase().replace(/[^a-z]/g, '');
-    if(word.length < 2) return;
-    
-    if(!vocabulary.includes(word)) {
+    if(word.length > 1 && !vocabulary.includes(word)) {
         vocabulary.push(word);
         localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary));
-        updateUI();
-        renderAnalytics();
+        updateUI(); renderAnalytics();
         input.value = "";
         showToast(`Added: ${word}`);
-    } else {
-        showToast("Already exists");
     }
 }
 
 function renderAnalytics() {
     const list = document.getElementById('dict-list');
-    list.innerHTML = "";
-    vocabulary.forEach(word => {
-        const div = document.createElement('div');
-        div.className = "card px-5 py-3 rounded-2xl font-bold uppercase text-xs flex items-center gap-3";
-        div.innerHTML = `<span>${word}</span><button onclick="speakWord('${word}')" class="opacity-30">🔊</button>`;
-        list.appendChild(div);
-    });
+    list.innerHTML = vocabulary.map(word => `
+        <div class="card px-4 py-2 rounded-xl font-bold uppercase text-xs flex gap-3 items-center">
+            ${word} <button onclick="speakWord('${word}')">🔊</button>
+        </div>
+    `).join('');
 }
 
 function startVocabularyQuiz() {
-    const box = document.getElementById('quiz-box');
-    const empty = document.getElementById('quiz-empty');
-    if(!vocabulary.length) { box.classList.add('hidden'); empty.classList.remove('hidden'); return; }
-    box.classList.remove('hidden'); empty.classList.add('hidden');
-    currentQuizWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-    document.getElementById('quiz-word').innerText = currentQuizWord;
+    if(!vocabulary.length) return;
+    document.getElementById('quiz-word').innerText = vocabulary[Math.floor(Math.random()*vocabulary.length)];
     document.getElementById('quiz-input').value = "";
 }
 
 async function checkVocabularyWord() {
+    const word = document.getElementById('quiz-word').innerText;
     const val = document.getElementById('quiz-input').value.trim().toLowerCase();
-    if(!val) return;
-    try {
-        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${currentQuizWord}`);
-        const d = await r.json();
-        const correct = d[0][0][0].toLowerCase();
-        if(val === correct || correct.includes(val)) {
-            showToast("Correct! 🎉");
-            setTimeout(startVocabularyQuiz, 1000);
-        } else {
-            showToast(`Wrong! It is: ${correct}`);
-            setTimeout(startVocabularyQuiz, 2000);
-        }
-    } catch { startVocabularyQuiz(); }
+    const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${word}`);
+    const d = await r.json();
+    const correct = d[0][0][0].toLowerCase();
+    if(val === correct || correct.includes(val)) { showToast("Correct!"); setTimeout(startVocabularyQuiz, 1000); }
+    else showToast(`Wrong! It's: ${correct}`);
 }
 
 function loadVoices() {
     voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
-    const select = document.getElementById('voice-select');
-    if(select) select.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+    const s = document.getElementById('voice-select');
+    if(s) s.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+}
+
+function toggleTheme() {
+    const d = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('ef_theme', d ? 'dark' : 'light');
 }
 
 function updateUI() {
-    document.getElementById('dict-count-nav').innerText = vocabulary.length;
-    document.getElementById('dict-count-main').innerText = vocabulary.length;
-}
-
-function shareVocabulary() {
-    const code = btoa(encodeURIComponent(JSON.stringify(vocabulary)));
-    const url = `${window.location.origin}${window.location.pathname}?import=${code}`;
-    navigator.clipboard.writeText(url).then(() => showToast("Link copied!"));
-}
-
-function checkImportedWords() {
-    const p = new URLSearchParams(window.location.search);
-    const d = p.get('import');
-    if(d) {
-        try {
-            const words = JSON.parse(decodeURIComponent(atob(d)));
-            vocabulary = [...new Set([...vocabulary, ...words])];
-            localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary));
-            updateUI();
-            window.history.replaceState({}, '', window.location.pathname);
-        } catch(e) {}
-    }
-}
-
-function speakText() {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(currentArt.text);
-    u.voice = voices[document.getElementById('voice-select').value];
-    window.speechSynthesis.speak(u);
-}
-
-function speakWord(w) {
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(w));
+    document.querySelectorAll('#dict-count-nav, #dict-count-main').forEach(e => e.innerText = vocabulary.length);
 }
 
 function showToast(m) {
     const t = document.getElementById('toast');
     t.innerText = m; t.classList.remove('opacity-0');
     setTimeout(() => t.classList.add('opacity-0'), 2000);
+}
+
+function speakWord(w) {
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(w));
 }
