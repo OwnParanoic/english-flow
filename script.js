@@ -1,54 +1,46 @@
-let vocabulary = JSON.parse(localStorage.getItem('ef_vocabulary')) || [];
+let vocabulary = JSON.parse(localStorage.getItem('ef_v6')) || [];
 let voices = [];
 let currentText = "";
-let isPaused = false;
+let isReading = false;
 
-// БАЗА ДАННЫХ И ТЕМЫ
+// База данных
 const libraryDB = [
-    { cat: 'Geography', title: 'The Sahara Desert', level: 'Medium', text: 'The Sahara is the largest hot desert in the world. It covers much of North Africa. The climate is extremely dry and hot.' },
-    { cat: 'Animals', title: 'Mountain Gorillas', level: 'Hard', text: 'Mountain gorillas live in high-altitude forests. They are highly social and intelligent creatures living in family groups.' },
-    { cat: 'Science', title: 'Quantum Computers', level: 'Hard', text: 'Quantum computers use qubits to perform calculations. They can process information much faster than traditional supercomputers.' }
+    { cat: 'Geography', title: 'The Amazon River', level: 'Medium', text: 'The Amazon River in South America is the largest river by discharge volume of water in the world. It flows through the tropical rainforest.' },
+    { cat: 'Animals', title: 'Ocean Giants', level: 'Hard', text: 'Blue whales are the largest animals ever known to have lived on Earth. These magnificent marine mammals rule the oceans.' },
+    { cat: 'Science', title: 'Mars Future', level: 'Hard', text: 'Mars is the fourth planet from the Sun. NASA is currently exploring its surface to find signs of ancient life.' }
 ];
 
-const topics = {
-    'Geography': ['Pacific Islands', 'Grand Canyon', 'Icelandic Glaciers', 'African Savanna', 'The Alps', 'Rivers of Europe'],
-    'Animals': ['Giant Pandas', 'Blue Whales', 'Desert Foxes', 'Arctic Wolves', 'Monarch Butterflies', 'Golden Eagles'],
-    'Cooking': ['French Pastry', 'Mexican Tacos', 'Greek Salad', 'Indian Spices', 'Brewing Coffee', 'Healthy Smoothies'],
-    'Work': ['Freelance Life', 'Job Efficiency', 'Leadership Skills', 'Global Economy', 'Networking Tips', 'Business Growth'],
-    'Science': ['Genetic Code', 'Climate Change', 'Neural Networks', 'Space Travel', 'Atomic Structure', 'Robotics Future']
-};
-
-Object.keys(topics).forEach(cat => {
-    topics[cat].forEach((name, i) => {
-        libraryDB.push({
-            cat: cat,
-            title: name,
-            level: i % 2 === 0 ? 'Medium' : 'Easy',
-            text: `Learning about ${name} is a great way to improve your ${cat.toLowerCase()} knowledge. This topic is essential for modern education. Understanding the details of ${name} will help you expand your vocabulary and speak more fluently. We recommend practicing this text several times until you feel confident with every word.`
-        });
-    });
+const categories = ['Geography', 'Animals', 'Science', 'Cooking', 'Work'];
+categories.forEach(c => {
+    for(let i=1; i<=5; i++) {
+        libraryDB.push({ cat: c, title: `${c} Topic ${i}`, level: 'Easy', text: `This text explores the interesting aspects of ${c.toLowerCase()}. It is designed to help you practice English and build your core vocabulary.` });
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    if(localStorage.getItem('ef_theme') === 'light') document.documentElement.classList.remove('dark');
     window.speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
     updateUI();
     filterLib('all');
 });
 
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
+    // Приоритет на Google голоса для качества
+    voices.sort((a,b) => b.name.includes('Google') - a.name.includes('Google'));
+    const s = document.getElementById('voice-select');
+    if(s) s.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+}
+
 function showPage(id) {
+    stopText();
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     document.getElementById('page-' + id).classList.remove('hidden');
-    if(id === 'profile') renderAnalytics();
     if(id === 'practice') startVocabularyQuiz();
+    if(id === 'profile') renderAnalytics();
 }
 
 function filterLib(cat) {
-    document.querySelectorAll('.cat-btn').forEach(b => {
-        b.classList.remove('active');
-        if(b.innerText.toLowerCase() === cat.toLowerCase() || (cat === 'all' && b.innerText === 'All')) b.classList.add('active');
-    });
     const grid = document.getElementById('library-grid');
     grid.innerHTML = "";
     const filtered = cat === 'all' ? libraryDB : libraryDB.filter(i => i.cat === cat);
@@ -56,7 +48,7 @@ function filterLib(cat) {
         const div = document.createElement('div');
         div.className = "topic-card";
         div.onclick = () => openTopic(item);
-        div.innerHTML = `<div class="text-[9px] opacity-30 mb-2 uppercase font-black">${item.cat} • ${item.level}</div><h4 class="font-bold text-sm">${item.title}</h4>`;
+        div.innerHTML = `<div class="text-[9px] opacity-40 uppercase font-black mb-1">${item.cat}</div><h4 class="font-bold text-sm">${item.title}</h4>`;
         grid.appendChild(div);
     });
 }
@@ -69,92 +61,145 @@ function openTopic(item) {
     currentText = item.text;
     const container = document.getElementById('res-text');
     container.innerHTML = "";
-    item.text.split(' ').forEach((word, i) => {
-        const span = document.createElement('span');
-        span.className = "word-span";
-        span.id = `word-${i}`;
-        span.innerText = word;
-        span.onclick = () => saveWord(word.toLowerCase().replace(/[^a-z]/g, ''));
-        container.appendChild(span);
-        container.appendChild(document.createTextNode(' '));
+    
+    // Каждое слово оборачиваем в span с уникальным char-индексом начала слова
+    let charAcc = 0;
+    item.text.split(/(\s+)/).forEach((part) => {
+        if (part.trim().length > 0) {
+            const span = document.createElement('span');
+            span.className = "word-span";
+            span.dataset.start = charAcc;
+            span.dataset.end = charAcc + part.length;
+            span.innerText = part;
+            
+            const sentence = item.text.split(/[.!?]/).find(s => s.includes(part)) || item.text;
+            span.onclick = () => saveWord(part.toLowerCase().replace(/[^a-z]/g, ''), sentence);
+            
+            container.appendChild(span);
+        } else {
+            container.appendChild(document.createTextNode(part));
+        }
+        charAcc += part.length;
     });
 }
 
-// ПЛЕЕР
+// УЛЬТИМАТИВНАЯ ПОДСВЕТКА ДЛЯ CHROME
 function speakText() {
-    window.speechSynthesis.cancel();
-    isPaused = false;
-    updateVoiceButtons('playing');
-    const utterance = new SpeechSynthesisUtterance(currentText);
-    utterance.voice = voices[document.getElementById('voice-select').value];
-    utterance.rate = 0.9;
-    utterance.onboundary = (e) => {
-        if (e.name === 'word') {
-            const idx = currentText.substring(0, e.charIndex).trim().split(/\s+/).length - 1;
-            document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
-            const target = document.getElementById(`word-${idx < 0 ? 0 : idx}`);
-            if (target) { target.classList.add('word-reading'); target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    stopText();
+    isReading = true;
+    const ut = new SpeechSynthesisUtterance(currentText);
+    ut.voice = voices[document.getElementById('voice-select').value];
+    ut.rate = 0.85;
+
+    ut.onboundary = (e) => {
+        if (!isReading || e.name !== 'word') return;
+        
+        const charIdx = e.charIndex;
+        // Находим span, чей dataset.start наиболее близок к charIdx
+        const spans = document.querySelectorAll('.word-span');
+        let currentSpan = null;
+
+        spans.forEach(span => {
+            span.classList.remove('word-reading');
+            const start = parseInt(span.dataset.start);
+            const end = parseInt(span.dataset.end);
+            // Chrome может давать charIndex с небольшой погрешностью из-за знаков препинания
+            if (charIdx >= start && charIdx < end) {
+                currentSpan = span;
+            }
+        });
+
+        if (currentSpan) {
+            currentSpan.classList.add('word-reading');
+            currentSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     };
-    utterance.onend = () => stopText();
-    window.speechSynthesis.speak(utterance);
+
+    ut.onend = () => { isReading = false; highlightNone(); };
+    window.speechSynthesis.speak(ut);
 }
 
-function pauseText() { if (window.speechSynthesis.speaking) { window.speechSynthesis.pause(); updateVoiceButtons('paused'); } }
-function resumeText() { if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); updateVoiceButtons('playing'); } }
-function stopText() { window.speechSynthesis.cancel(); document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading')); updateVoiceButtons('stopped'); }
+function highlightNone() { document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading')); }
 
-function updateVoiceButtons(state) {
-    const play = document.getElementById('btn-play');
-    const pause = document.getElementById('btn-pause');
-    const resume = document.getElementById('btn-resume');
-    if (state === 'playing') { play.classList.add('hidden'); pause.classList.remove('hidden'); resume.classList.add('hidden'); }
-    else if (state === 'paused') { play.classList.add('hidden'); pause.classList.add('hidden'); resume.classList.remove('hidden'); }
-    else { play.classList.remove('hidden'); pause.classList.add('hidden'); resume.classList.add('hidden'); }
+function stopText() {
+    window.speechSynthesis.cancel();
+    isReading = false;
+    highlightNone();
 }
 
-// ПРАКТИКА
-function startVocabularyQuiz() {
-    const content = document.getElementById('quiz-content');
-    const empty = document.getElementById('quiz-empty');
-    if(!vocabulary.length) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
-    content.classList.remove('hidden'); empty.classList.add('hidden');
-    document.getElementById('quiz-word').innerText = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-    document.getElementById('quiz-input').value = ""; document.getElementById('quiz-input').focus();
-}
-
-async function checkVocabularyWord() {
-    const word = document.getElementById('quiz-word').innerText;
-    const val = document.getElementById('quiz-input').value.trim().toLowerCase();
-    if(!val) return;
+async function saveWord(w, context) {
+    if(w.length < 2) return;
     try {
-        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${word}`);
+        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(w)}`);
         const d = await r.json();
-        const correct = d[0][0][0].toLowerCase();
-        if(val === correct || correct.includes(val)) { showToast("Correct! 🎉"); setTimeout(startVocabularyQuiz, 1000); }
-        else { showToast(`Wrong. It's: ${correct}`); }
+        const translation = d[0][0][0].toLowerCase();
+        
+        if(!vocabulary.find(v => v.word === w)) {
+            vocabulary.push({ word: w, translation, context: context.trim() });
+            localStorage.setItem('ef_v6', JSON.stringify(vocabulary));
+            updateUI();
+            showToast(`Saved: ${w}`);
+        }
     } catch(e) { showToast("Error"); }
 }
 
-function saveWord(w) {
-    if(!w || w.length < 2) return;
-    if(!vocabulary.includes(w)) { vocabulary.push(w); localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary)); updateUI(); showToast(`Saved: ${w}`); }
+function startVocabularyQuiz() {
+    const content = document.getElementById('quiz-content'), empty = document.getElementById('quiz-empty');
+    if(vocabulary.length < 4) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+    content.classList.remove('hidden'); empty.classList.add('hidden');
+    
+    const current = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+    document.getElementById('quiz-word').innerText = current.word;
+    document.getElementById('quiz-hint').innerText = `"${current.context.replace(new RegExp(current.word, 'gi'), '____')}"`;
+    
+    let opts = [current.translation];
+    while(opts.length < 4) {
+        let r = vocabulary[Math.floor(Math.random() * vocabulary.length)].translation;
+        if(!opts.includes(r)) opts.push(r);
+    }
+    opts.sort(() => Math.random() - 0.5);
+    
+    const container = document.getElementById('quiz-options');
+    container.innerHTML = "";
+    opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "option-btn";
+        btn.innerText = opt;
+        btn.onclick = () => {
+            if(opt === current.translation) {
+                btn.classList.add('correct');
+                showToast("Excellent!");
+                setTimeout(startVocabularyQuiz, 1000);
+            } else {
+                btn.classList.add('wrong');
+            }
+        };
+        container.appendChild(btn);
+    });
 }
 
-function addWordManually() {
-    const val = document.getElementById('manual-word-input').value.trim().toLowerCase().replace(/[^a-z]/g, '');
-    if(val.length > 1) { vocabulary.push(val); localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary)); updateUI(); renderAnalytics(); document.getElementById('manual-word-input').value = ""; }
+function renderAnalytics() {
+    document.getElementById('dict-list').innerHTML = vocabulary.map(v => `
+        <div class="card p-5 rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-black uppercase text-indigo-600 dark:text-indigo-400">${v.word}</span>
+                <button onclick="speakWord('${v.word}')" class="w-8 h-8 flex items-center justify-center bg-indigo-50 dark:bg-indigo-900/30 rounded-full">🔊</button>
+            </div>
+            <div class="text-xs font-bold mb-1">${v.translation}</div>
+            <div class="text-[10px] opacity-40 italic line-clamp-2">${v.context}</div>
+        </div>
+    `).join('');
 }
 
-function loadVoices() {
-    voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
-    const s = document.getElementById('voice-select');
-    if(s) s.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+function speakWord(w) {
+    window.speechSynthesis.cancel();
+    const ut = new SpeechSynthesisUtterance(w);
+    ut.voice = voices[document.getElementById('voice-select').value];
+    ut.rate = 0.8;
+    window.speechSynthesis.speak(ut);
 }
 
 function updateUI() { document.querySelectorAll('#dict-count-nav, #dict-count-main').forEach(el => el.innerText = vocabulary.length); }
 function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }
-function toggleTheme() { const d = document.documentElement.classList.toggle('dark'); localStorage.setItem('ef_theme', d ? 'dark' : 'light'); }
-function renderAnalytics() {
-    document.getElementById('dict-list').innerHTML = vocabulary.map(word => `<div class="card p-4 rounded-xl font-bold uppercase text-xs flex justify-between items-center">${word} <button onclick="window.speechSynthesis.speak(new SpeechSynthesisUtterance('${word}'))">🔊</button></div>`).join('');
-}
+function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+function addWordManually() { const val = document.getElementById('manual-word-input').value.trim(); if(val) saveWord(val.toLowerCase(), "Manual add"); }
