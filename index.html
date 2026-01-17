@@ -7,97 +7,76 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100 transition-colors duration-300">
+<body class="min-h-screen transition-colors duration-300">
 
-    <header class="bg-slate-900/50 border-b border-slate-800 px-6 py-4 sticky top-0 z-50 backdrop-blur-md">
+    <header class="header-bg border-b border-slate-200 dark:border-slate-800 px-6 py-4 sticky top-0 z-50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-6">
                 <div onclick="showPage('home')" class="flex items-center gap-2 cursor-pointer group">
                     <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition">EF</div>
                     <span class="text-xl font-black italic tracking-tighter">EnglishFlow</span>
                 </div>
-                <nav class="hidden md:flex gap-6 text-[10px] font-bold uppercase tracking-[0.2em] opacity-50">
-                    <button onclick="showPage('home')" class="hover:text-indigo-400 transition">Home</button>
-                    <button onclick="showPage('profile')" class="hover:text-indigo-400 transition">Vocabulary (<span id="dict-count-nav">0</span>)</button>
-                    <button onclick="showPage('practice')" class="hover:text-indigo-400 transition">Practice</button>
+                <nav class="hidden md:flex gap-6 text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
+                    <button onclick="showPage('home')" class="hover:text-indigo-500 transition">Home</button>
+                    <button onclick="showPage('profile')" class="hover:text-indigo-500 transition">Vocabulary (<span id="dict-count-nav">0</span>)</button>
+                    <button onclick="showPage('practice')" class="hover:text-indigo-500 transition">Practice</button>
                 </nav>
             </div>
-            <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition">🌙</button>
+            <button onclick="toggleTheme()" id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">🌙</button>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-6">
-        <section id="page-home" class="page-content space-y-8 py-10">
-            <div class="text-center space-y-6">
-                <h1 class="text-5xl md:text-6xl font-black italic tracking-tighter uppercase">AI Master</h1>
-                <div class="flex justify-center gap-3">
-                    <select id="diff-select" class="bg-slate-900 border border-slate-800 px-5 py-2 rounded-2xl text-xs font-bold uppercase tracking-widest outline-none focus:border-indigo-500 transition">
-                        <option value="A1">Beginner</option>
-                        <option value="B2" selected>Intermediate</option>
-                        <option value="C1">Advanced</option>
-                    </select>
-                </div>
-                <div class="max-w-xl mx-auto flex gap-2 p-2 bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-800 focus-within:border-indigo-500 transition-all">
-                    <input type="text" id="ai-prompt" placeholder="Write topic (Space, Cars, Music)..." class="flex-1 px-5 bg-transparent outline-none font-medium">
-                    <button onclick="generateAIContent()" class="bg-indigo-600 text-white px-8 py-4 rounded-[1.5rem] font-bold uppercase text-xs hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 transition active:scale-95">Generate</button>
+        <section id="page-home" class="page-content space-y-8 py-6">
+            <div class="text-center space-y-4">
+                <h1 class="text-5xl font-black italic tracking-tighter uppercase">AI Teacher</h1>
+                <div class="max-w-xl mx-auto flex gap-2 p-2 card rounded-[2rem] shadow-xl">
+                    <input type="text" id="ai-prompt" placeholder="Enter topic (Space, Art, Sport)..." class="flex-1 px-5 bg-transparent outline-none font-medium">
+                    <button onclick="generateAIContent()" class="bg-indigo-600 text-white px-6 py-3 rounded-[1.5rem] font-bold uppercase text-xs hover:bg-indigo-500 transition active:scale-95">Generate</button>
                 </div>
             </div>
 
-            <div id="ai-loading" class="hidden text-center py-20"><div class="animate-spin text-5xl inline-block text-indigo-500 italic font-black">EF</div></div>
+            <div id="ai-loading" class="hidden text-center py-10"><div class="animate-spin text-4xl inline-block text-indigo-500 font-black">🌀</div></div>
 
-            <div id="ai-result" class="hidden space-y-8">
-                <div class="grid md:grid-cols-3 gap-4 bg-slate-900 p-5 rounded-[2rem] border border-slate-800 shadow-xl">
-                    <select id="voice-select" class="p-3 bg-slate-800 rounded-xl text-xs font-bold outline-none border border-slate-700"></select>
-                    <select id="rate-select" class="p-3 bg-slate-800 rounded-xl text-xs font-bold outline-none border border-slate-700">
-                        <option value="0.8">Slow Speed</option><option value="1.0" selected>Normal Speed</option>
-                    </select>
-                    <button onclick="speakText()" class="bg-indigo-600 text-white py-3 rounded-xl font-bold uppercase text-xs hover:bg-indigo-500 transition">🔊 Listen</button>
+            <div id="ai-result" class="hidden space-y-6">
+                <div class="card p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between">
+                    <select id="voice-select" class="bg-transparent text-xs font-bold outline-none"></select>
+                    <button onclick="speakText()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase">🔊 Listen</button>
                 </div>
-
-                <div class="bg-slate-900 p-8 md:p-12 rounded-[3rem] border border-slate-800 shadow-2xl relative">
-                    <h2 id="res-title" class="text-4xl font-black text-indigo-500 mb-6 uppercase tracking-tighter"></h2>
-                    <div id="res-text" class="text-2xl leading-relaxed font-medium text-slate-200"></div>
+                <div class="card p-8 md:p-12 rounded-[3rem] shadow-sm">
+                    <h2 id="res-title" class="text-3xl font-black text-indigo-600 mb-6 uppercase tracking-tighter"></h2>
+                    <div id="res-text" class="text-2xl leading-relaxed opacity-90"></div>
                 </div>
-
-                <div class="bg-indigo-600 p-8 md:p-12 rounded-[3rem] text-white shadow-2xl">
-                    <div class="flex justify-between items-center mb-8">
-                        <h3 class="text-2xl font-black uppercase italic">Smart Test</h3>
-                        <button onclick="toggleQuizTranslation()" class="text-[10px] font-black border border-white/30 px-4 py-2 rounded-full uppercase tracking-widest hover:bg-white/10">Translate</button>
-                    </div>
-                    <div id="res-quiz" class="space-y-10"></div>
-                    <div class="mt-10 flex justify-between items-center border-t border-white/20 pt-8">
-                        <button onclick="checkQuiz()" id="check-btn" class="bg-white text-indigo-600 px-10 py-4 rounded-2xl font-black uppercase hover:scale-105 transition active:scale-95">Verify Answers</button>
-                        <div id="quiz-score" class="text-3xl font-black italic"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="page-practice" class="page-content hidden py-10">
-            <div class="max-w-md mx-auto bg-slate-900 p-10 rounded-[3rem] border border-slate-800 shadow-2xl text-center">
-                <div id="quiz-box">
-                    <p class="text-[10px] font-black opacity-30 uppercase tracking-[0.3em] mb-10">Vocabulary Training</p>
-                    <div id="quiz-word" class="text-5xl font-black text-indigo-500 mb-12 uppercase tracking-tighter">...</div>
-                    <input type="text" id="quiz-input" placeholder="Перевод..." class="w-full p-5 bg-slate-800 rounded-2xl border-2 border-slate-700 outline-none text-center font-bold mb-6 focus:border-indigo-500 transition-all text-xl">
-                    <button onclick="checkVocabularyWord()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition active:scale-95">Submit</button>
-                </div>
-                <div id="quiz-empty" class="hidden py-10 italic opacity-40">Add at least 1 word to start!</div>
             </div>
         </section>
 
         <section id="page-profile" class="page-content hidden py-10 space-y-8">
-            <div class="flex justify-between items-end px-4">
-                <div>
-                    <h3 class="text-4xl font-black uppercase tracking-tighter">Dictionary</h3>
-                    <p class="text-indigo-500 font-bold uppercase text-[10px] tracking-widest mt-1">Total: <span id="dict-count-main">0</span> words</p>
+            <div class="card p-8 rounded-[2.5rem] shadow-xl border-2 border-indigo-500/20">
+                <h3 class="text-xl font-black uppercase mb-4 tracking-tighter">Add Word Manually</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="manual-word-input" placeholder="English word..." class="flex-1 p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none font-bold">
+                    <button onclick="addWordManually()" class="bg-indigo-600 text-white px-8 rounded-2xl font-black uppercase text-xs hover:bg-indigo-500 transition">Add</button>
                 </div>
-                <button onclick="shareVocabulary()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-green-900/20">🔗 Share List</button>
             </div>
-            <div id="dict-list" class="flex flex-wrap gap-3 bg-slate-900/50 p-8 rounded-[3rem] border border-slate-800 min-h-[300px] content-start"></div>
+
+            <div class="flex justify-between items-end">
+                <h3 class="text-3xl font-black uppercase tracking-tighter">My Words (<span id="dict-count-main">0</span>)</h3>
+                <button onclick="shareVocabulary()" class="text-xs font-bold text-indigo-500 uppercase tracking-widest">🔗 Share</button>
+            </div>
+            <div id="dict-list" class="flex flex-wrap gap-3 p-2"></div>
+        </section>
+
+        <section id="page-practice" class="page-content hidden py-10 text-center">
+            <div id="quiz-box" class="max-w-md mx-auto card p-10 rounded-[3rem] shadow-2xl">
+                <div id="quiz-word" class="text-5xl font-black text-indigo-600 mb-10 uppercase tracking-tighter">...</div>
+                <input type="text" id="quiz-input" placeholder="Перевод..." class="w-full p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none text-center font-bold mb-6 text-xl">
+                <button onclick="checkVocabularyWord()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase hover:bg-indigo-500 transition">Verify</button>
+            </div>
+            <div id="quiz-empty" class="hidden opacity-50 italic">Your dictionary is empty!</div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white text-slate-950 px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all duration-300 font-black z-[100] pointer-events-none uppercase text-xs tracking-widest"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px] tracking-widest"></div>
 
     <script src="script.js"></script>
 </body>
