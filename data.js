@@ -1,4 +1,4 @@
-const stories = [
+const pack1 = [
     // ================= EASY (10 ТЕКСТОВ) =================
     { 
         title: "The Life of a Garden", cat: "Nature", lvl: "Easy", 
@@ -125,7 +125,7 @@ const stories = [
         text: "Renaissance architecture, which began in Florence in the early 15th century, represented a conscious revival of the elements of classical Greek and Roman thought and material culture. Architects like Filippo Brunelleschi sought to move away from the complex Gothic style toward something more harmonious and symmetrical.\n\nThe use of the dome, the column, and the arch became central to this new style. One of the greatest examples is the Dome of the Florence Cathedral, a massive engineering feat that remains a symbol of human ingenuity. Renaissance buildings were designed to reflect the order and beauty of the natural world.\n\nThis movement was not just about aesthetics; it was deeply tied to the philosophy of humanism. Buildings were intended to be built on a human scale, emphasizing the importance of the individual's experience within the space. This period laid the groundwork for modern architectural principles and remains a source of inspiration for designers worldwide." 
     }
 ];
-const stories2 = [
+const pack2 = [
     // ================= EASY (10 ТЕКСТОВ) =================
     { 
         title: "The Story of King Midas", cat: "Mythology", lvl: "Easy", 
@@ -252,7 +252,7 @@ const stories2 = [
         text: "Nihilism is the philosophical belief that life is without objective meaning, purpose, or intrinsic value. It often arises from a scientific worldview that sees the universe as vast, ancient, and indifferent to human concerns. While nihilism is frequently associated with despair or pessimism, many philosophers have found it to be a liberating perspective.\n\nFriedrich Nietzsche, a key figure in this area, argued that the 'death of God' and the collapse of traditional moral systems would lead to nihilism. However, he saw this as a challenge: if there is no pre-determined meaning, then humans are free to create their own values and live as 'supermen' who define their own destiny. This is often called 'optimistic nihilism.'\n\nIn modern psychology, the struggle to find meaning in an apparently meaningless world is a major theme. Existential therapy focuses on helping individuals accept this lack of inherent purpose and take responsibility for constructing their own significance through relationships, work, and creativity. It suggests that meaning is not something we 'find' in the universe, but something we 'build' within ourselves." 
     }
 ];
-const stories3 = [
+const pack3 = [
     // ================= EASY (10 ТЕКСТОВ) =================
     { 
         title: "The Story of Pizza", cat: "Food", lvl: "Easy", 
@@ -379,7 +379,7 @@ const stories3 = [
         text: "As our planet faces climate change and rapid urbanization, the way we build cities must fundamentally change. The architecture of the future is not just about height, but about 'sustainability' and 'integration.' We are moving toward 'Vertical Forests'—skyscrapers covered in thousands of trees that absorb CO2 and provide natural cooling.\n\nAnother revolutionary concept is '3D-printed architecture.' Using giant robotic arms, we can now print entire houses out of concrete or recycled materials in just a few days. This could provide affordable housing for millions of people. Furthermore, 'smart cities' will use sensors and AI to manage energy and traffic, making urban life more efficient and less wasteful.\n\nSome architects are even looking beyond Earth, designing habitats for the Moon and Mars that use 'regolith' (space dust) as a building material. Whether it's a floating city in the ocean or a colony on another planet, the buildings of tomorrow will be living systems that generate their own power and recycle their own waste, blurring the line between technology and nature." 
     }
 ];
-const stories4 = [
+const pack4 = [
     // ================= EASY (10 ТЕКСТОВ) =================
     { 
         title: "Going to the Movies", cat: "Culture", lvl: "Easy", 
@@ -509,7 +509,6 @@ const stories4 = [
 
 // В самом низу файла data.js, после всех массивов:
 
-var allStories = [...stories1, ...stories2, ...stories3, ...stories4];
-var stories = allStories;
+stories = [...pack1, ...pack2, ...pack3, ...pack4];
 
-console.log("Библиотека загружена. Всего текстов:", window.stories.length);
+console.log("Успех! Загружено текстов:", stories.length);
