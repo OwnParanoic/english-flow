@@ -1,64 +1,4 @@
-const stories = [
-    // GEOGRAPHY
-    { title: "The Sahara Desert", cat: "Geography", lvl: "Medium", text: "The Sahara is the world's largest hot desert. It covers most of North Africa. The landscape features massive sand dunes and rocky plateaus." },
-    { title: "Pacific Islands", cat: "Geography", lvl: "Medium", text: "There are thousands of islands in the Pacific Ocean. Many were formed by volcanoes. They have tropical climates and unique wildlife." },
-    { title: "Grand Canyon", cat: "Geography", lvl: "Easy", text: "The Grand Canyon is in Arizona, USA. It was carved by the Colorado River over millions of years. It is famous for its colorful rock layers." },
-    { title: "Icelandic Glaciers", cat: "Geography", lvl: "Medium", text: "Iceland is known as the land of fire and ice. It has many glaciers and active volcanoes. Scientists visit it to study climate change." },
-    { title: "African Savanna", cat: "Geography", lvl: "Easy", text: "The savanna is a large grassland in Africa. It is home to many famous animals like lions, elephants, and zebras. It has two main seasons." },
-    { title: "The Alps", cat: "Geography", lvl: "Medium", text: "The Alps are the highest mountain range in Europe. They stretch across eight countries. People visit for skiing and hiking." },
-    { title: "Rivers of Europe", cat: "Geography", lvl: "Easy", text: "Europe has many important rivers like the Danube and the Rhine. They are used for transport and provide water to many large cities." },
-    { title: "Amazon Rainforest", cat: "Geography", lvl: "Hard", text: "The Amazon is the largest tropical rainforest in the world. It plays a vital role in regulating the Earth's oxygen and carbon cycles." },
 
-    // ANIMALS
-    { title: "The Lion King", cat: "Animals", lvl: "Easy", text: "The lion is known as the king of the jungle. They live in groups called prides. Males have manes, while females do the hunting." },
-    { title: "Giant Pandas", cat: "Animals", lvl: "Easy", text: "Pandas live in the mountains of China. They eat almost nothing but bamboo. They are famous for their black and white fur." },
-    { title: "Great White Shark", cat: "Animals", lvl: "Medium", text: "The Great White is a large predator found in coastal waters. They have hundreds of sharp teeth and a powerful sense of smell." },
-    { title: "The Blue Whale", cat: "Animals", lvl: "Hard", text: "The blue whale is the largest animal ever known to have lived on Earth. Despite their size, they feed mainly on tiny shrimp-called krill." },
-    { title: "Honey Bees", cat: "Animals", lvl: "Medium", text: "Bees are essential for pollinating flowers and crops. They live in highly organized colonies led by a single queen bee." },
-    { title: "The Smart Octopus", cat: "Animals", lvl: "Medium", text: "Octopuses are incredibly intelligent. They can solve puzzles, open jars, and even camouflage themselves by changing their skin color and texture to match their surroundings." },
-    { title: "Migrating Birds", cat: "Animals", lvl: "Medium", text: "Many birds fly thousands of miles every year to find food or better weather. This is called migration. They use the Earth's magnetic field and the stars to find their way." },
-
-    // SCIENCE
-    { title: "Solar System", cat: "Science", lvl: "Easy", text: "Our solar system has eight planets. The Sun is at the center. Earth is the only planet known to support life." },
-    { title: "Black Holes", cat: "Science", lvl: "Hard", text: "A black hole is a region of spacetime where gravity is so strong that nothing, not even light, can escape from its pull." },
-    { title: "DNA Structure", cat: "Science", lvl: "Hard", text: "DNA is the molecule that carries genetic instructions for all living things. It has a unique double helix shape discovered in 1953." },
-    { title: "Renewable Energy", cat: "Science", lvl: "Medium", text: "Solar and wind power are types of renewable energy. They are cleaner for the planet than burning coal or oil." },
-
-    // WORK & BUSINESS
-    { title: "Job Interview", cat: "Work", lvl: "Medium", text: "During an interview, you should talk about your skills and experience. It is important to arrive on time and dress professionally." },
-    { title: "Remote Work", cat: "Work", lvl: "Medium", text: "Many people now work from home using the internet. This offers flexibility but requires good time management skills." },
-    { title: "Startup Culture", cat: "Work", lvl: "Hard", text: "Startups are small companies designed to grow fast. They often have informal offices but require long hours and hard work." },
-
-    // SPACE
-    { title: "The Red Planet", cat: "Space", lvl: "Medium", text: "Mars is often called the Red Planet because of iron oxide on its surface. NASA has sent several rovers, like Curiosity and Perseverance, to explore its dry lakes." },
-    { title: "The Moon Landing", cat: "Space", lvl: "Easy", text: "In 1969, Neil Armstrong became the first human to step on the moon. It was a historic moment for all of humanity." },
-    { title: "Saturn's Rings", cat: "Space", lvl: "Medium", text: "Saturn is famous for its bright and complex rings. These rings are made of billions of small chunks of ice and rock." },
-
-    // MEDICINE
-    { title: "How Vaccines Work", cat: "Medicine", lvl: "Hard", text: "Vaccines train your immune system to recognize and fight pathogens. They introduce a tiny, harmless piece of the germ into the body." },
-    { title: "Healthy Sleep", cat: "Medicine", lvl: "Easy", text: "Sleep is very important for your brain and body. Most adults need seven to nine hours of sleep every night. Good sleep helps you learn better." },
-    { title: "The Human Heart", cat: "Medicine", lvl: "Medium", text: "Your heart is a muscle that pumps blood to your whole body. It beats about 100,000 times a day. To keep it strong, exercise regularly." },
-
-    // PSYCHOLOGY
-    { title: "Body Language", cat: "Psychology", lvl: "Medium", text: "Non-verbal communication, or body language, makes up a huge part of how we talk to each other. Your posture and gestures tell a lot." },
-    { title: "The Placebo Effect", cat: "Psychology", lvl: "Hard", text: "The placebo effect happens when a person's health improves after taking a fake treatment simply because they believe it will work." },
-
-    // HISTORY
-    { title: "The Silk Road", cat: "History", lvl: "Medium", text: "The Silk Road was an ancient network of trade routes that connected Europe and Asia. It allowed people to trade silk and spices." },
-    { title: "The Vikings", cat: "History", lvl: "Medium", text: "Vikings were famous explorers and warriors from Scandinavia. They traveled across the ocean in longships and reached North America." },
-
-    // TECH
-    { title: "How Wi-Fi Works", cat: "Tech", lvl: "Medium", text: "Wi-Fi uses radio waves to send information between your device and a router. It allows us to connect to the internet without any cables." },
-    { title: "The Future of AI", cat: "Tech", lvl: "Hard", text: "Artificial Intelligence is growing fast. In the future, AI might help doctors perform surgeries and drive cars safely." },
-
-    // LIFESTYLE
-    { title: "Morning Routine", cat: "Life", lvl: "Easy", text: "Having a good morning routine can help you stay productive. Many people start their day with a glass of water and exercise." },
-    { title: "Benefits of Tea", cat: "Life", lvl: "Easy", text: "Tea is the most popular drink in the world after water. Green tea is known for having many antioxidants that are good for health." },
-
-    // COOKING
-    { title: "Cooking Pasta", cat: "Cooking", lvl: "Easy", text: "To cook pasta, boil water with a little salt. Add the pasta and cook for ten minutes. Serve with your favorite sauce." },
-    { title: "Baking Bread", cat: "Cooking", lvl: "Medium", text: "Making bread requires flour, water, yeast, and salt. You must knead the dough and let it rise before baking in a hot oven." }
-];
 
 let vocab = JSON.parse(localStorage.getItem('ef_v20')) || [];
 let currentCategory = 'All';
@@ -296,4 +236,5 @@ function showToast(m) {
     t.innerText = m; t.style.opacity = "1";
     setTimeout(() => t.style.opacity = "0", 2000);
 }
+
 
