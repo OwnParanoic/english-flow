@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnglishFlow Pro Max</title>
+    <title>EnglishFlow Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class' }
@@ -13,65 +13,59 @@
 </head>
 <body class="bg-[#f8fafc] dark:bg-[#050505] text-slate-900 dark:text-white transition-all duration-300 font-sans">
 
-    <header class="px-8 py-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('library')">
+    <header class="px-8 py-6 flex justify-between items-center max-w-7xl mx-auto sticky top-0 bg-[#f8fafc]/80 dark:bg-[#050505]/80 backdrop-blur-md z-[100]">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('home')">
             <div class="w-10 h-10 bg-[#5d5fef] rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">EF</div>
             <h1 class="text-2xl font-black italic tracking-tighter">EnglishFlow</h1>
         </div>
         <nav class="hidden md:flex gap-10 text-[11px] font-bold uppercase tracking-[0.2em] opacity-50">
-            <button onclick="showPage('home')" class="hover:opacity-100">Home</button>
-            <button onclick="showPage('library')" class="hover:opacity-100">Library</button>
-            <button onclick="showPage('profile')" class="hover:opacity-100">Vocab (<span id="v-count">0</span>)</button>
-            <button onclick="showPage('practice')" class="text-[#5d5fef] opacity-100">Practice</button>
+            <button onclick="showPage('home')" class="hover:opacity-100 transition">Home</button>
+            <button onclick="showPage('library')" class="hover:opacity-100 transition">Library</button>
+            <button onclick="showPage('profile')" class="hover:opacity-100 transition">Vocab (<span id="v-count">0</span>)</button>
+            <button onclick="showPage('practice')" class="hover:opacity-100 transition text-[#5d5fef]">Practice</button>
         </nav>
         <button onclick="toggleTheme()" class="p-2 bg-white dark:bg-white/5 rounded-full shadow-sm">🌙</button>
     </header>
 
     <main class="max-w-7xl mx-auto p-6">
-        <section id="page-library" class="page-content space-y-10">
-            <div class="flex flex-col md:flex-row justify-between items-end gap-6">
-                <h2 class="text-5xl font-black italic uppercase tracking-tighter">Library</h2>
-                <div id="cat-nav" class="flex flex-wrap gap-2 justify-end">
-                    </div>
+        <section id="page-home" class="page-content space-y-8">
+            <div id="home-welcome" class="text-center py-20 animate-fade">
+                <div class="inline-block p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-3xl mb-6"><span class="text-4xl">👋</span></div>
+                <h2 class="text-5xl font-black italic uppercase tracking-tighter mb-4">Welcome back!</h2>
+                <button onclick="showPage('library')" class="bg-[#5d5fef] text-white px-10 py-4 rounded-2xl font-black uppercase text-[10px] shadow-xl hover:scale-105 transition">Open Library</button>
             </div>
 
+            <div id="reader-ui" class="hidden animate-fade space-y-8">
+                <div class="flex justify-between items-center bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5">
+                    <button onclick="showPage('library')" class="text-[10px] font-bold uppercase opacity-40">← Back</button>
+                    <div class="flex gap-4">
+                        <button onclick="speak()" class="bg-[#5d5fef] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">▶ Listen</button>
+                        <button onclick="stop()" class="bg-slate-100 dark:bg-white/10 px-6 py-3 rounded-xl font-black text-[10px] uppercase">Stop</button>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-[#0a0a0a] p-12 md:p-24 rounded-[3rem] text-center shadow-xl border border-slate-50 dark:border-white/5">
+                    <div id="story-meta" class="text-[9px] font-black uppercase text-indigo-500 mb-4 tracking-[0.2em]"></div>
+                    <h2 id="story-title" class="text-4xl font-black mb-10 italic tracking-tighter"></h2>
+                    <div id="story-text" class="text-2xl md:text-3xl leading-[2.2] text-slate-600 dark:text-slate-400 max-w-4xl mx-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-library" class="page-content hidden space-y-10">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+                <h2 class="text-5xl font-black italic uppercase tracking-tighter">Library</h2>
+                <div id="cat-nav" class="flex flex-wrap gap-2 justify-end"></div>
+            </div>
             <div id="lib-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade"></div>
         </section>
 
-        <section id="page-home" class="page-content space-y-8">
-    <div id="home-welcome" class="text-center py-20 animate-fade">
-        <div class="inline-block p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-3xl mb-6">
-            <span class="text-4xl">👋</span>
-        </div>
-        <h2 class="text-5xl font-black italic uppercase tracking-tighter mb-4">Welcome back!</h2>
-        <p class="text-slate-400 font-medium max-w-md mx-auto mb-10">Ready to improve your English? Pick a story from the library to start reading and listening.</p>
-        <button onclick="showPage('library')" class="bg-[#5d5fef] text-white px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-indigo-500/20 hover:scale-105 transition">Open Library</button>
-    </div>
-
-    <div id="reader-ui" class="hidden animate-fade space-y-8">
-        <div class="flex justify-between items-center bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5">
-            <button onclick="showPage('library')" class="text-[10px] font-bold uppercase opacity-40 hover:opacity-100 transition">← Back to Library</button>
-            <div class="flex gap-4">
-                <button onclick="speak()" class="bg-[#5d5fef] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">▶ Listen</button>
-                <button onclick="stop()" class="bg-slate-100 dark:bg-white/10 px-6 py-3 rounded-xl font-black text-[10px] uppercase">Stop</button>
-            </div>
-        </div>
-        <div class="bg-white dark:bg-[#0a0a0a] p-12 md:p-24 rounded-[3rem] text-center shadow-xl border border-slate-50 dark:border-white/5">
-            <div id="story-meta" class="text-[9px] font-black uppercase text-indigo-500 mb-4 tracking-[0.2em]"></div>
-            <h2 id="story-title" class="text-4xl font-black mb-10 italic tracking-tighter"></h2>
-            <div id="story-text" class="text-2xl md:text-3xl leading-[2.2] text-slate-600 dark:text-slate-400 max-w-4xl mx-auto"></div>
-        </div>
-    </div>
-</section>
-
         <section id="page-practice" class="page-content hidden py-20">
-            <div class="max-w-xl mx-auto bg-white dark:bg-white/5 p-12 rounded-[3rem] text-center shadow-2xl">
+            <div class="max-w-xl mx-auto bg-white dark:bg-white/5 p-12 rounded-[3rem] text-center shadow-2xl border border-slate-100 dark:border-white/5">
                 <div id="quiz-active">
-                    <div class="text-[10px] font-black uppercase opacity-30 mb-4 tracking-[0.2em]">Translate this word:</div>
                     <div id="quiz-word" class="text-5xl font-black mb-12 text-[#5d5fef] italic"></div>
                     <div id="quiz-options" class="grid gap-4"></div>
                 </div>
-                <div id="quiz-none" class="hidden py-10 opacity-30 font-black uppercase italic">Add at least 4 words to start practice</div>
+                <div id="quiz-none" class="hidden py-10 opacity-30 font-black uppercase italic">Add at least 4 words to start</div>
             </div>
         </section>
 
@@ -81,9 +75,8 @@
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-[10px] uppercase shadow-2xl opacity-0 transition-opacity pointer-events-none"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-[10px] uppercase shadow-2xl opacity-0 transition-opacity pointer-events-none z-[200]"></div>
 
     <script src="script.js"></script>
 </body>
 </html>
-
