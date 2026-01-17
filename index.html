@@ -7,83 +7,71 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class' }
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
+        if (localStorage.theme === 'dark') document.documentElement.classList.add('dark');
     </script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#f8fafc] dark:bg-[#050505] text-slate-900 dark:text-white transition-all duration-500 font-sans">
+<body class="bg-[#f8fafc] dark:bg-[#050505] text-slate-900 dark:text-white transition-all duration-300 font-sans">
 
-    <header class="px-8 py-6 flex justify-between items-center max-w-7xl mx-auto sticky top-0 bg-[#f8fafc]/80 dark:bg-[#050505]/80 backdrop-blur-md z-[100]">
-        <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('home')">
+    <header class="px-8 py-6 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="showPage('library')">
             <div class="w-10 h-10 bg-[#5d5fef] rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">EF</div>
             <h1 class="text-2xl font-black italic tracking-tighter">EnglishFlow</h1>
         </div>
         <nav class="hidden md:flex gap-10 text-[11px] font-bold uppercase tracking-[0.2em] opacity-50">
-            <button onclick="showPage('home')" class="hover:opacity-100 transition">Home</button>
-            <button onclick="showPage('library')" class="hover:opacity-100 transition">Library</button>
-            <button onclick="showPage('profile')" class="hover:opacity-100 transition">Vocab (<span id="v-count">0</span>)</button>
+            <button onclick="showPage('home')" class="hover:opacity-100">Home</button>
+            <button onclick="showPage('library')" class="hover:opacity-100">Library</button>
+            <button onclick="showPage('profile')" class="hover:opacity-100">Vocab (<span id="v-count">0</span>)</button>
             <button onclick="showPage('practice')" class="text-[#5d5fef] opacity-100">Practice</button>
         </nav>
-        <button onclick="toggleTheme()" class="p-3 rounded-xl border border-slate-200 dark:border-white/10">
-            <span class="dark:hidden text-xl">🌙</span><span class="hidden dark:inline text-xl">☀️</span>
-        </button>
+        <button onclick="toggleTheme()" class="p-2 bg-white dark:bg-white/5 rounded-full shadow-sm">🌙</button>
     </header>
 
     <main class="max-w-7xl mx-auto p-6">
-        <section id="page-home" class="page-content space-y-8">
-            <div id="reader-ui" class="hidden animate-fade">
-                <div class="flex flex-wrap justify-between items-center mb-8 bg-white dark:bg-white/5 p-4 rounded-2xl border border-slate-100 dark:border-white/5">
-                    <select id="voice-select" class="bg-transparent font-bold text-[10px] uppercase outline-none cursor-pointer p-2"></select>
-                    <div class="flex gap-3">
-                        <button onclick="speak()" class="bg-[#5d5fef] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-xl hover:scale-105 transition">▶ Listen</button>
-                        <button onclick="stop()" class="bg-slate-200 dark:bg-white/10 px-6 py-3 rounded-xl font-black text-[10px] uppercase">Stop</button>
+        <section id="page-library" class="page-content space-y-10">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+                <h2 class="text-5xl font-black italic uppercase tracking-tighter">Library</h2>
+                <div id="cat-nav" class="flex flex-wrap gap-2 justify-end">
                     </div>
-                </div>
-                <div class="bg-white dark:bg-[#0a0a0a] p-10 md:p-20 rounded-[3rem] shadow-sm border border-slate-100 dark:border-white/5 text-center">
-                    <div id="story-meta" class="text-[10px] font-black uppercase text-indigo-500 mb-4 tracking-[0.2em]"></div>
-                    <h2 id="story-title" class="text-4xl font-black mb-10 italic tracking-tighter"></h2>
-                    <div id="story-text" class="text-2xl md:text-3xl leading-[2.2] font-medium text-slate-600 dark:text-slate-400 max-w-4xl mx-auto"></div>
-                </div>
             </div>
-            <div id="home-empty" class="text-center py-40 opacity-20 font-black uppercase tracking-widest italic">Pick a story from the library</div>
+
+            <div id="lib-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade"></div>
         </section>
 
-        <section id="page-library" class="page-content hidden">
-            <div class="mb-12">
-                <h2 class="text-6xl font-black italic uppercase tracking-tighter mb-4">Library</h2>
-                <div id="breadcrumb" class="flex gap-2 text-[10px] font-black uppercase opacity-40 tracking-widest mb-8">All Categories</div>
-                
-                <div class="relative max-w-2xl">
-                    <input type="text" id="lib-search" oninput="searchStories()" placeholder="Search topics (e.g. 'Business', 'Space')..." 
-                           class="w-full p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 outline-none focus:border-[#5d5fef] transition-all font-bold text-sm">
-                    <div id="search-results" class="hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 mt-2 rounded-2xl shadow-2xl border border-slate-100 dark:border-white/10 z-[60] max-h-[300px] overflow-y-auto"></div>
+        <section id="page-home" class="page-content hidden animate-fade">
+            <div id="reader-ui" class="space-y-8">
+                <div class="flex justify-between items-center bg-white dark:bg-white/5 p-4 rounded-2xl shadow-sm">
+                    <button onclick="showPage('library')" class="text-[10px] font-bold uppercase opacity-40">← Back</button>
+                    <div class="flex gap-4">
+                        <button onclick="speak()" class="bg-[#5d5fef] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">▶ Listen</button>
+                        <button onclick="stop()" class="bg-slate-100 dark:bg-white/10 px-6 py-3 rounded-xl font-black text-[10px] uppercase">Stop</button>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-[#0a0a0a] p-12 md:p-24 rounded-[3rem] text-center shadow-xl border border-slate-50 dark:border-white/5">
+                    <h2 id="story-title" class="text-4xl font-black mb-10 italic tracking-tighter"></h2>
+                    <div id="story-text" class="text-2xl md:text-3xl leading-[2.2] text-slate-600 dark:text-slate-400 max-w-4xl mx-auto"></div>
                 </div>
             </div>
-            
-            <div id="cat-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade"></div>
-            <div id="level-selection" class="hidden animate-fade"><div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="level-grid"></div></div>
-            <div id="stories-selection" class="hidden animate-fade"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="final-stories-grid"></div></div>
         </section>
 
         <section id="page-practice" class="page-content hidden py-20">
-            <div id="quiz-container" class="max-w-xl mx-auto text-center bg-white dark:bg-white/5 p-12 rounded-[3rem] border border-slate-100 dark:border-white/5">
+            <div class="max-w-xl mx-auto bg-white dark:bg-white/5 p-12 rounded-[3rem] text-center shadow-2xl">
                 <div id="quiz-active">
-                    <div id="quiz-word" class="text-6xl font-black mb-12 text-[#5d5fef] uppercase italic tracking-tighter"></div>
-                    <div id="quiz-options" class="grid gap-3"></div>
+                    <div class="text-[10px] font-black uppercase opacity-30 mb-4 tracking-[0.2em]">Translate this word:</div>
+                    <div id="quiz-word" class="text-5xl font-black mb-12 text-[#5d5fef] italic"></div>
+                    <div id="quiz-options" class="grid gap-4"></div>
                 </div>
-                <div id="quiz-none" class="hidden opacity-40 font-bold uppercase tracking-widest text-sm">Save 4 words to start!</div>
+                <div id="quiz-none" class="hidden py-10 opacity-30 font-black uppercase italic">Add at least 4 words to start practice</div>
             </div>
         </section>
 
         <section id="page-profile" class="page-content hidden">
-            <h2 class="text-4xl font-black italic uppercase mb-10">Vocabulary</h2>
-            <div id="vocab-list" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+            <h2 class="text-3xl font-black uppercase mb-8 italic">My Dictionary</h2>
+            <div id="vocab-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-black text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-2xl opacity-0 transition-all z-[100]"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-[10px] uppercase shadow-2xl opacity-0 transition-opacity pointer-events-none"></div>
 
     <script src="script.js"></script>
 </body>
