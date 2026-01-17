@@ -2,7 +2,6 @@
 
 :root {
     --bg: #f8fafc;
-    --header: rgba(255, 255, 255, 0.8);
     --card: #ffffff;
     --text: #0f172a;
     --border: #e2e8f0;
@@ -10,7 +9,6 @@
 
 .dark {
     --bg: #020617;
-    --header: rgba(15, 23, 42, 0.8);
     --card: #0f172a;
     --text: #f1f5f9;
     --border: #1e293b;
@@ -22,30 +20,45 @@ body {
     color: var(--text);
 }
 
-.header-bg { background-color: var(--header); }
+.card { background-color: var(--card); border: 1px solid var(--border); }
+.header-bg { background-color: var(--card); }
 
-.card {
-    background-color: var(--card);
-    border: 1px solid var(--border);
-}
-
+/* Подсветка слов */
 .word-span {
     display: inline-block;
-    padding: 0 4px;
-    border-radius: 6px;
+    padding: 0 2px;
+    border-radius: 4px;
     cursor: pointer;
     transition: 0.2s;
 }
 
-.word-span:hover {
-    background-color: rgba(99, 102, 241, 0.2);
-    color: #6366f1;
+/* При чтении голосом */
+.word-reading {
+    background-color: #6366f1 !important;
+    color: white !important;
+    transform: scale(1.1);
 }
 
+/* Сохраненное слово */
 .word-saved {
-    background-color: #fbbf24 !important;
-    color: #000 !important;
+    border-bottom: 3px solid #fbbf24;
     font-weight: 800;
 }
+
+/* Стили библиотеки */
+.level-btn { border: 2px solid transparent; background: var(--card); opacity: 0.5; }
+.level-btn.active { border-color: #6366f1; opacity: 1; color: #6366f1; }
+
+.topic-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.topic-card:hover { border-color: #6366f1; transform: translateY(-3px); }
 
 .page-content.hidden { display: none; }
