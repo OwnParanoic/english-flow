@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnglishFlow | Premium Learning</title>
+    <title>EnglishFlow | Premium Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,9 +19,9 @@
                 <button onclick="showPage('home')" class="hover:text-indigo-500">Home</button>
                 <button onclick="showPage('library')" class="hover:text-indigo-500">Library</button>
                 <button onclick="showPage('profile')" class="hover:text-indigo-500 font-bold">Vocab (<span id="dict-count-nav">0</span>)</button>
-                <button onclick="showPage('practice')" class="hover:text-indigo-500">Practice</button>
+                <button onclick="showPage('practice')" class="hover:text-indigo-500 font-bold">Practice</button>
             </nav>
-            <button onclick="toggleTheme()" id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">🌙</button>
+            <button onclick="toggleTheme()" id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700">🌙</button>
         </div>
     </header>
 
@@ -29,23 +29,23 @@
         <section id="page-home" class="page-content space-y-8 py-6">
             <div id="ai-result" class="hidden space-y-6">
                 <div class="card p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between border-indigo-500/20 shadow-xl shadow-indigo-500/5">
-                    <div class="flex items-center gap-4">
-                        <select id="voice-select" class="bg-transparent text-[10px] font-black uppercase outline-none"></select>
+                    <select id="voice-select" class="bg-transparent text-[10px] font-black uppercase outline-none mr-4"></select>
+                    <div class="flex gap-2">
+                        <button id="btn-play" onclick="speakText()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/30">▶ Play</button>
+                        <button id="btn-pause" onclick="pauseText()" class="hidden bg-amber-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase hover:bg-amber-400 transition shadow-lg">⏸ Pause</button>
+                        <button id="btn-resume" onclick="resumeText()" class="hidden bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase hover:bg-emerald-500 transition shadow-lg">▶ Resume</button>
+                        <button onclick="stopText()" class="bg-slate-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase hover:bg-slate-400 transition shadow-lg">⏹ Stop</button>
                     </div>
-                    <button onclick="speakText()" class="bg-indigo-600 text-white px-8 py-3 rounded-2xl text-xs font-black uppercase hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/30">🔊 Start Listening</button>
                 </div>
                 <div class="card p-8 md:p-16 rounded-[3rem] shadow-sm relative border-indigo-500/10">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 id="res-title" class="text-3xl font-black text-indigo-600 uppercase tracking-tighter"></h2>
-                        <span id="res-level" class="px-4 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-black opacity-50"></span>
-                    </div>
-                    <div id="res-text" class="text-2xl md:text-3xl leading-[1.6] opacity-90 font-medium"></div>
+                    <h2 id="res-title" class="text-3xl font-black text-indigo-600 uppercase tracking-tighter mb-8 italic"></h2>
+                    <div id="res-text" class="text-2xl md:text-3xl leading-[1.7] opacity-90 font-medium"></div>
                 </div>
             </div>
             <div id="home-placeholder" class="text-center py-20">
                 <div class="text-6xl mb-6">📖</div>
-                <h3 class="text-2xl font-black uppercase mb-4">Ready to read?</h3>
-                <button onclick="showPage('library')" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold uppercase text-xs">Browse Library</button>
+                <h3 class="text-2xl font-black uppercase mb-4 italic tracking-widest">Select a topic to start</h3>
+                <button onclick="showPage('library')" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest">Open Library</button>
             </div>
         </section>
 
@@ -58,37 +58,40 @@
                     <button onclick="filterLib('Animals')" class="cat-btn">Animals</button>
                     <button onclick="filterLib('Cooking')" class="cat-btn">Cooking</button>
                     <button onclick="filterLib('Work')" class="cat-btn">Work</button>
-                    <button onclick="filterLib('Study')" class="cat-btn">Study</button>
+                    <button onclick="filterLib('Science')" class="cat-btn">Science</button>
                 </div>
             </div>
             <div id="library-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
         </section>
 
-        <section id="page-profile" class="page-content hidden py-10 space-y-8">
-            <div class="card p-8 rounded-[2.5rem] border-2 border-indigo-500/10">
-                <h3 class="text-[10px] font-black uppercase mb-4 opacity-50 tracking-widest">Manual Insertion</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="manual-word-input" placeholder="Enter word..." class="flex-1 p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl outline-none font-bold">
-                    <button onclick="addWordManually()" class="bg-indigo-600 text-white px-8 rounded-2xl font-black uppercase text-xs">Add</button>
-                </div>
-            </div>
-            <div class="flex justify-between items-center">
-                <h3 class="text-3xl font-black uppercase tracking-tighter">Vocabulary (<span id="dict-count-main">0</span>)</h3>
-            </div>
-            <div id="dict-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
-        </section>
-
         <section id="page-practice" class="page-content hidden py-10">
             <div id="quiz-box" class="max-w-xl mx-auto card p-16 rounded-[4rem] text-center shadow-2xl border-indigo-500/10">
-                <div class="text-[10px] font-black uppercase opacity-30 mb-8 tracking-widest">Translate this word</div>
-                <div id="quiz-word" class="text-6xl font-black text-indigo-600 mb-12 uppercase tracking-tighter">...</div>
-                <input type="text" id="quiz-input" placeholder="Type here..." class="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-3xl outline-none text-center font-bold mb-8 text-2xl border-2 border-transparent focus:border-indigo-500 transition">
-                <button onclick="checkVocabularyWord()" class="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black uppercase shadow-xl shadow-indigo-500/30 active:scale-95 transition">Submit</button>
+                <div id="quiz-empty" class="hidden">
+                    <div class="text-4xl mb-4">📭</div>
+                    <p class="font-bold opacity-50 uppercase text-xs tracking-widest">Your dictionary is empty.<br>Save words while reading!</p>
+                </div>
+                <div id="quiz-content">
+                    <div class="text-[10px] font-black uppercase opacity-30 mb-8 tracking-widest">Translate this word</div>
+                    <div id="quiz-word" class="text-6xl font-black text-indigo-600 mb-12 uppercase tracking-tighter">...</div>
+                    <input type="text" id="quiz-input" placeholder="Type here..." class="w-full p-6 bg-slate-100 dark:bg-slate-800 rounded-3xl outline-none text-center font-bold mb-8 text-2xl border-2 border-transparent focus:border-indigo-500 transition">
+                    <button onclick="checkVocabularyWord()" class="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black uppercase shadow-xl shadow-indigo-500/30">Submit</button>
+                </div>
             </div>
+        </section>
+
+        <section id="page-profile" class="page-content hidden py-10 space-y-8">
+            <div class="card p-6 rounded-[2rem] border-2 border-indigo-500/20">
+                <div class="flex gap-2">
+                    <input type="text" id="manual-word-input" placeholder="Add word manually..." class="flex-1 p-4 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none font-bold">
+                    <button onclick="addWordManually()" class="bg-indigo-600 text-white px-6 rounded-xl font-black uppercase text-xs">Add</button>
+                </div>
+            </div>
+            <h3 class="text-3xl font-black uppercase tracking-tighter">My Vocabulary (<span id="dict-count-main">0</span>)</h3>
+            <div id="dict-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px] tracking-widest"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px]"></div>
 
     <script src="script.js"></script>
 </body>
