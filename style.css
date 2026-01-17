@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
 
 :root {
     --bg: #f8fafc;
@@ -21,11 +21,9 @@ body {
     overflow-x: hidden;
 }
 
+.card { background-color: var(--card); border: 1px solid var(--border); }
 .header-bg { background-color: var(--card); }
 
-.card { background-color: var(--card); border: 1px solid var(--border); }
-
-/* Сетка библиотеки */
 .cat-btn {
     padding: 10px 20px;
     border-radius: 12px;
@@ -34,7 +32,7 @@ body {
     text-transform: uppercase;
     transition: 0.3s;
     border: 1px solid var(--border);
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .cat-btn.active {
@@ -42,7 +40,7 @@ body {
     color: white;
     opacity: 1;
     border-color: #6366f1;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .topic-card {
@@ -50,36 +48,33 @@ body {
     border: 1px solid var(--border);
     padding: 2.5rem 1.5rem;
     border-radius: 2rem;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: 0.3s;
     cursor: pointer;
     text-align: center;
 }
 
 .topic-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
     border-color: #6366f1;
-    box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.1);
 }
 
-/* Синхронизация чтения */
 .word-span {
     display: inline-block;
     padding: 0 3px;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: 0.15s;
+    transition: 0.1s;
 }
 
 .word-reading {
     background-color: #6366f1 !important;
-    color: white !important;
-    transform: scale(1.15) rotate(1deg);
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-}
-
-.word-saved {
-    border-bottom: 4px solid #fbbf24;
-    font-weight: 800;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    transform: scale(1.1);
+    font-weight: 700;
+    z-index: 10;
+    position: relative;
 }
 
 .page-content.hidden { display: none; }
