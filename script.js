@@ -1,200 +1,198 @@
-let vocabulary = JSON.parse(localStorage.getItem('ef_v10')) || [];
-let voices = [];
-let isReading = false;
-let currentText = "";
+const storyDatabase = [
+    // --- HISTORY ---
+    { id: "hist-a-1", cat: "History", level: "A", title: "The Great Wall", text: "The Great Wall of China is very long. It was built many years ago to protect the country. Thousands of people worked on it. Today, many tourists visit this place to walk on the stones." },
+    { id: "hist-b-1", cat: "History", level: "B", title: "Industrial Revolution", text: "The Industrial Revolution began in Great Britain in the late 1700s. It was a time when goods started being made by machines. This change led to the growth of cities and transformed the global economy." },
+    { id: "hist-c-1", cat: "History", level: "C", title: "The Fall of Rome", text: "Historians debate the primary causes of the Roman Empire's decline. Factors included military overexpansion, political instability, and economic disruption. The complex interplay eventually led to total collapse." },
+    
+    // --- BUSINESS ---
+    { id: "biz-a-1", cat: "Business", level: "A", title: "Small Shop", text: "John has a small shop. He sells coffee and tea. Many people come to his shop in the morning. He is happy because his business is good and customers are friendly." },
+    { id: "biz-c-1", cat: "Business", level: "C", title: "Market Disruption", text: "Market disruption occurs when a smaller company with fewer resources is able to challenge established businesses. By focusing on overlooked segments, they redefine industry standards." },
 
-const libraryDB = [
-    { title: "The Red Planet", cat: "Science", text: "Mars is often called the Red Planet because of the iron oxide on its surface. Humans are planning to build cities there in the next fifty years. It will be a difficult but exciting challenge for explorers." },
-    { title: "Ocean Giants", cat: "Nature", text: "Blue whales are the largest animals to ever exist on Earth. They eat tiny shrimp called krill. Despite their massive size, they are gentle creatures that sing beautiful songs under the water." },
-    { title: "Electric Dreams", cat: "Tech", text: "Electric cars are replacing traditional vehicles to help save the environment. Modern batteries allow drivers to travel long distances without using gasoline. This technology is improving every year." },
-    { title: "Secret Gardens", cat: "Lifestyle", text: "Gardening is a great way to reduce stress and enjoy nature. Growing your own vegetables ensures that your food is healthy and fresh. Many people find peace while working with the soil." },
-    { title: "Coffee Culture", cat: "Culture", text: "Coffee is one of the most popular drinks in the world. From Italian espresso to Turkish coffee, every country has its own traditions. It brings people together in cafes and homes." }
+    // --- PSYCHOLOGY ---
+    { id: "psy-b-1", cat: "Psychology", level: "B", title: "Power of Habit", text: "Habits are small actions we do every day. It takes about 66 days to form a new habit. If you want to change your life, start with a small goal like exercising for ten minutes." },
+    { id: "psy-c-1", cat: "Psychology", level: "C", title: "Cognitive Dissonance", text: "Cognitive dissonance is the mental discomfort experienced by a person who holds contradictory beliefs. To reduce tension, individuals often change their attitudes or justify behaviors." },
+
+    // --- SLANG ---
+    { id: "sla-a-1", cat: "Slang", level: "A", title: "Fun Idioms", text: "When something is very easy, we say it is a piece of cake. If you are happy, you are on cloud nine. These expressions make your English sound natural." },
+    { id: "sla-c-1", cat: "Slang", level: "C", title: "Modern Slang", text: "Digital communication has birthed terms like ghosting. When something is excellent, Gen Z might call it fire or slay. Understanding these nuances is vital for modern social media." },
+
+    // --- SPACE ---
+    { id: "spa-b-1", cat: "Space", level: "B", title: "Solar System", text: "Our solar system has eight planets. Mars is the Red Planet, while Jupiter is the largest. Saturn has rings made of ice. Scientists use telescopes to explore distant worlds." }
 ];
 
+const CATEGORIES = [
+    { name: "History", icon: "🏛️" }, { name: "Technology", icon: "💻" },
+    { name: "Science", icon: "🧪" }, { name: "Nature", icon: "🌿" },
+    { name: "Business", icon: "📈" }, { name: "Culture", icon: "🎨" },
+    { name: "Psychology", icon: "🧠" }, { name: "Space", icon: "🚀" },
+    { name: "Health", icon: "🍎" }, { name: "Slang", icon: "💬" }
+];
+
+const LEVELS = [
+    { id: "A", label: "Level A", desc: "Beginner" },
+    { id: "B", label: "Level B", desc: "Intermediate" },
+    { id: "C", label: "Level C", desc: "Advanced" }
+];
+
+let vocab = JSON.parse(localStorage.getItem('ef_final')) || [];
+let currentCat = null;
+let currentLvl = null;
+let voices = [];
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Ждем загрузки голосов
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
-    renderLibrary();
-    updateVocabCount();
+    window.speechSynthesis.onvoiceschanged = () => {
+        voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
+        const sel = document.getElementById('voice-select');
+        if (sel) sel.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+    };
+    renderCats();
+    updateCount();
 });
 
-// 1. ИСПРАВЛЕНИЕ СМЕНЫ ТЕМЫ
 function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-}
-
-function loadVoices() {
-    voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
-    const s = document.getElementById('voice-select');
-    if(s && voices.length > 0) {
-        s.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
-    }
+    localStorage.theme = isDark ? 'dark' : 'light';
 }
 
 function showPage(id) {
-    stopText();
+    stop();
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-    document.getElementById('page-' + id).classList.remove('hidden');
-    if(id === 'practice') startQuiz();
-    if(id === 'profile') renderVocabList();
+    document.getElementById(`page-${id}`).classList.remove('hidden');
+    if (id === 'practice') runQuiz();
+    if (id === 'profile') renderVocab();
 }
 
-function renderLibrary() {
-    const grid = document.getElementById('library-grid');
-    grid.innerHTML = libraryDB.map(item => `
-        <div class="topic-card p-8 rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900" 
-             onclick='openTopic(${JSON.stringify(item)})'>
-            <div class="text-[10px] font-black uppercase text-indigo-500 mb-3 tracking-widest">${item.cat}</div>
-            <h4 class="font-bold text-xl leading-tight">${item.title}</h4>
+function renderCats() {
+    hideSteps();
+    updateBreadcrumb("All Categories");
+    const grid = document.getElementById('cat-grid');
+    grid.classList.remove('hidden');
+    grid.innerHTML = CATEGORIES.map(c => `
+        <div class="story-card !text-left group" onclick="chooseCat('${c.name}')">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">${c.icon}</div>
+            <h4 class="text-2xl font-black uppercase italic">${c.name}</h4>
         </div>
     `).join('');
 }
 
-function openTopic(item) {
+function chooseCat(cat) {
+    currentCat = cat;
+    hideSteps();
+    updateBreadcrumb(`All Categories > ${cat}`);
+    const sel = document.getElementById('level-selection');
+    sel.classList.remove('hidden');
+    document.getElementById('level-grid').innerHTML = LEVELS.map(l => `
+        <div class="story-card !p-12 border-b-4 border-b-transparent hover:border-b-indigo-500" onclick="chooseLvl('${l.id}')">
+            <div class="text-3xl font-black text-indigo-500 mb-2">${l.id}</div>
+            <h4 class="text-lg font-bold uppercase">${l.label}</h4>
+        </div>
+    `).join('');
+}
+
+function chooseLvl(lvl) {
+    currentLvl = lvl;
+    hideSteps();
+    updateBreadcrumb(`All Categories > ${currentCat} > ${lvl}`);
+    const sel = document.getElementById('stories-selection');
+    sel.classList.remove('hidden');
+    const filtered = storyDatabase.filter(s => s.cat === currentCat && s.level === lvl);
+    document.getElementById('final-stories-grid').innerHTML = filtered.length ? filtered.map(s => `
+        <div class="story-card !p-6 flex flex-col justify-between min-h-[160px]" onclick='openStory(${JSON.stringify(s)})'>
+            <h5 class="font-bold text-sm">${s.title}</h5>
+            <div class="text-[9px] font-black text-indigo-500 uppercase mt-4">Read Now →</div>
+        </div>
+    `).join('') : `<div class="col-span-full py-20 opacity-30 font-bold text-center">No texts yet. Try another level!</div>`;
+}
+
+function openStory(s) {
     showPage('home');
-    document.getElementById('home-placeholder').classList.add('hidden');
-    document.getElementById('ai-result').classList.remove('hidden');
-    document.getElementById('res-title').innerText = item.title;
-    currentText = item.text;
-    
-    const container = document.getElementById('res-text');
-    container.innerHTML = "";
-    
-    let charAcc = 0;
-    // Разбиваем на слова, сохраняя пробелы
-    item.text.split(/(\s+)/).forEach(part => {
-        if(part.trim().length > 0) {
+    document.getElementById('home-empty').classList.add('hidden');
+    document.getElementById('reader-ui').classList.remove('hidden');
+    document.getElementById('story-title').innerText = s.title;
+    document.getElementById('story-meta').innerText = `${s.cat} | ${s.level}`;
+    window.currentTxt = s.text;
+    const box = document.getElementById('story-text');
+    box.innerHTML = "";
+    let pos = 0;
+    s.text.split(/(\s+)/).forEach(part => {
+        if (part.trim().length > 0) {
             const span = document.createElement('span');
             span.className = "word-span";
             span.innerText = part;
-            span.dataset.start = charAcc;
-            span.dataset.end = charAcc + part.length;
-            span.onclick = () => saveAndOpen(part.toLowerCase().replace(/[^a-z]/g, ''));
-            container.appendChild(span);
-        } else {
-            container.appendChild(document.createTextNode(part));
-        }
-        charAcc += part.length;
+            span.dataset.start = pos;
+            span.dataset.end = pos + part.length;
+            span.onclick = () => saveWord(part.toLowerCase().replace(/[^a-z]/g, ''));
+            box.appendChild(span);
+        } else { box.appendChild(document.createTextNode(part)); }
+        pos += part.length;
     });
 }
 
-// 2. REVERSO + СОХРАНЕНИЕ
-async function saveAndOpen(word) {
-    if(word.length < 2) return;
-    
-    // ПРЯМАЯ ССЫЛКА НА REVERSO
-    window.open(`https://context.reverso.net/translation/english-russian/${word}`, '_blank');
-
+async function saveWord(w) {
+    if (w.length < 2) return;
+    window.open(`https://context.reverso.net/translation/english-russian/${w}`, '_blank');
     try {
-        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${word}`);
+        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${w}`);
         const d = await r.json();
-        const translation = d[0][0][0].toLowerCase();
-
-        if(!vocabulary.some(v => v.word === word)) {
-            vocabulary.push({ word, translation });
-            localStorage.setItem('ef_v10', JSON.stringify(vocabulary));
-            updateVocabCount();
-            showToast(`Added: ${word}`);
+        const tr = d[0][0][0].toLowerCase();
+        if (!vocab.find(v => v.w === w)) {
+            vocab.push({ w, tr });
+            localStorage.setItem('ef_final', JSON.stringify(vocab));
+            updateCount();
+            toast(`Saved: ${w}`);
         }
     } catch(e) {}
 }
 
-// 3. СТАБИЛЬНАЯ ПОДСВЕТКА (EDGE + CHROME)
-function speakText() {
-    stopText();
-    if (!currentText) return;
-    isReading = true;
-
-    const ut = new SpeechSynthesisUtterance(currentText);
-    const voiceIdx = document.getElementById('voice-select').value;
-    if(voices[voiceIdx]) ut.voice = voices[voiceIdx];
+function speak() {
+    stop();
+    window.isReading = true;
+    const ut = new SpeechSynthesisUtterance(window.currentTxt);
+    const sel = document.getElementById('voice-select');
+    if (voices[sel.value]) ut.voice = voices[sel.value];
     ut.rate = 0.85;
-
     ut.onboundary = (e) => {
-        if(!isReading || e.name !== 'word') return;
-        
-        const charIdx = e.charIndex;
-        const spans = document.querySelectorAll('.word-span');
-        
-        spans.forEach(span => {
-            const start = parseInt(span.dataset.start);
-            const end = parseInt(span.dataset.end);
-            
-            if(charIdx >= start && charIdx < end) {
-                span.classList.add('word-reading');
-                span.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                span.classList.remove('word-reading');
-            }
+        if (!window.isReading || e.name !== 'word') return;
+        const char = e.charIndex;
+        document.querySelectorAll('.word-span').forEach(s => {
+            const start = parseInt(s.dataset.start), end = parseInt(s.dataset.end);
+            if (char >= start && char < end) {
+                s.classList.add('reading-now');
+                s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else { s.classList.remove('reading-now'); }
         });
     };
-
-    ut.onend = () => { isReading = false; clearHL(); };
+    ut.onend = () => { window.isReading = false; clearH(); };
     window.speechSynthesis.speak(ut);
 }
 
-function stopText() {
-    window.speechSynthesis.cancel();
-    isReading = false;
-    clearHL();
+function stop() { window.speechSynthesis.cancel(); window.isReading = false; clearH(); }
+function clearH() { document.querySelectorAll('.reading-now').forEach(e => e.classList.remove('reading-now')); }
+
+function searchStories() {
+    const q = document.getElementById('lib-search').value.toLowerCase();
+    const res = document.getElementById('search-results');
+    if (q.length < 2) { res.classList.add('hidden'); return; }
+    const matches = storyDatabase.filter(s => s.title.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q)).slice(0, 5);
+    res.classList.remove('hidden');
+    res.innerHTML = matches.map(s => `<div class="p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer" onclick='openStory(${JSON.stringify(s)})'>
+        <div class="text-[8px] font-black text-indigo-500 uppercase">${s.cat}</div><div class="font-bold">${s.title}</div></div>`).join('');
 }
 
-function clearHL() {
-    document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
+function updateBreadcrumb(path) { document.getElementById('breadcrumb').innerText = path; }
+function hideSteps() { document.getElementById('cat-grid').classList.add('hidden'); document.getElementById('level-selection').classList.add('hidden'); document.getElementById('stories-selection').classList.add('hidden'); }
+function updateCount() { document.getElementById('v-count').innerText = vocab.length; }
+function toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }
+function runQuiz() {
+    const act = document.getElementById('quiz-active'), none = document.getElementById('quiz-none');
+    if (vocab.length < 4) { act.classList.add('hidden'); none.classList.remove('hidden'); return; }
+    act.classList.remove('hidden'); none.classList.add('hidden');
+    const cur = vocab[Math.floor(Math.random() * vocab.length)];
+    document.getElementById('quiz-word').innerText = cur.w;
+    let ops = [cur.tr];
+    while(ops.length < 4) { let r = vocab[Math.floor(Math.random() * vocab.length)].tr; if (!ops.includes(r)) ops.push(r); }
+    ops.sort(() => Math.random() - 0.5);
+    document.getElementById('quiz-options').innerHTML = ops.map(o => `<button class="opt-btn" onclick="check(this, '${o}', '${cur.tr}')">${o}</button>`).join('');
 }
-
-// 4. ТЕСТЫ
-function startQuiz() {
-    const content = document.getElementById('quiz-content'), empty = document.getElementById('quiz-empty');
-    if(vocabulary.length < 4) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
-    
-    content.classList.remove('hidden'); empty.classList.add('hidden');
-
-    const current = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-    document.getElementById('quiz-word').innerText = current.word;
-    
-    let options = [current.translation];
-    while(options.length < 4) {
-        let rand = vocabulary[Math.floor(Math.random() * vocabulary.length)].translation;
-        if(!options.includes(rand)) options.push(rand);
-    }
-    options.sort(() => Math.random() - 0.5);
-
-    document.getElementById('quiz-options').innerHTML = options.map(opt => `
-        <button class="p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 font-bold hover:border-indigo-500 transition-all" 
-                onclick="checkAns(this, '${opt}', '${current.translation}')">${opt}</button>
-    `).join('');
-}
-
-function checkAns(btn, val, correct) {
-    if(val === correct) {
-        btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500');
-        showToast("Correct! 🎉");
-        setTimeout(startQuiz, 1000);
-    } else {
-        btn.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
-    }
-}
-
-function renderVocabList() {
-    document.getElementById('dict-list').innerHTML = vocabulary.map(v => `
-        <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
-            <div class="font-black uppercase text-indigo-500 text-sm tracking-tighter">${v.word}</div>
-            <div class="text-[10px] opacity-50 font-bold uppercase">${v.translation}</div>
-        </div>
-    `).join('');
-}
-
-function updateVocabCount() {
-    document.getElementById('dict-count-nav').innerText = vocabulary.length;
-}
-
-function showToast(m) {
-    const t = document.getElementById('toast');
-    t.innerText = m; t.classList.remove('opacity-0');
-    setTimeout(() => t.classList.add('opacity-0'), 2000);
-}
+function check(btn, val, cor) { if (val === cor) { btn.style.background = '#10b981'; btn.style.color = 'white'; setTimeout(runQuiz, 1000); } else { btn.style.background = '#ef4444'; btn.style.color = 'white'; } }
+function renderVocab() { document.getElementById('vocab-list').innerHTML = vocab.map(v => `<div class="bg-white dark:bg-white/5 p-6 rounded-2xl border border-slate-100 dark:border-white/5 text-center"><div class="font-black text-[#5d5fef] uppercase text-xs">${v.w}</div><div class="text-[10px] opacity-40 uppercase">${v.tr}</div></div>`).join(''); }
