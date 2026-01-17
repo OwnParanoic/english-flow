@@ -86,17 +86,21 @@ function filterCat(c) {
     renderLibrary();
 }
 
-// РЕНДЕР БИБЛИОТЕКИ (ВИД КАК НА СКРИНШОТЕ)
 function renderLibrary() {
     const grid = document.getElementById('lib-grid');
     const filtered = currentCategory === 'All' ? stories : stories.filter(s => s.cat === currentCategory);
     
-    grid.innerHTML = filtered.map(s => `
-        <div class="story-card" onclick='openStory(${JSON.stringify(s)})'>
-            <div class="card-meta">${s.cat} • ${s.lvl}</div>
-            <h4 class="card-title">${s.title}</h4>
-        </div>
-    `).join('');
+    grid.innerHTML = filtered.map(s => {
+        // Цвет для уровня сложности
+        const lvlColor = s.lvl === 'Easy' ? 'text-green-500' : s.lvl === 'Medium' ? 'text-orange-500' : 'text-red-500';
+        
+        return `
+            <div class="story-card" onclick='openStory(${JSON.stringify(s)})'>
+                <div class="card-meta">${s.cat} • <span class="${lvlColor}">${s.lvl}</span></div>
+                <h4 class="card-title">${s.title}</h4>
+            </div>
+        `;
+    }).join('');
 }
 
 // Исправленная логика открытия (с гарантированным скрытием Home Welcome)
@@ -231,6 +235,7 @@ function renderVocab() {
         </div>
     `).join('');
 }
+
 
 
 
