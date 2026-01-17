@@ -27,6 +27,34 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
 .animate-fade { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .page-content.hidden { display: none; }
+/* Исправление отображения списка голосов в темной теме */
+#voice-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%235d5fef'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
+}
+
+.dark #voice-select {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.dark #voice-select option {
+    background-color: #0a0a0a;
+    color: white;
+}
+
+/* Более мягкая подсветка для Chrome */
+.reading-now {
+    background-color: #5d5fef !important;
+    color: white !important;
+    border-radius: 4px;
+    box-shadow: 0 0 8px rgba(93, 95, 239, 0.5);
+    transition: all 0.1s ease;
+}
 
 /* Стиль для слова, которое произносится сейчас */
 .reading-now {
@@ -37,3 +65,4 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
     box-shadow: 0 4px 12px rgba(93, 95, 239, 0.3);
     z-index: 10;
 }
+
