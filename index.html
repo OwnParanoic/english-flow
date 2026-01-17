@@ -1,90 +1,94 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnglishFlow Pro | Final Fix</title>
+    <title>EnglishFlow Pro Max</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // ЭТОТ БЛОК ОБЯЗАТЕЛЕН ДЛЯ РАБОТЫ ТЕМЫ
+        tailwind.config = {
+            darkMode: 'class'
+        }
+        
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        initTheme();
+    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
     <header class="border-b border-slate-200 dark:border-slate-800 px-6 py-4 sticky top-0 z-50 backdrop-blur-md bg-white/90 dark:bg-slate-900/90">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div onclick="showPage('home')" class="flex items-center gap-2 cursor-pointer group">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30">EF</div>
+            <div onclick="showPage('home')" class="flex items-center gap-2 cursor-pointer">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">EF</div>
                 <span class="text-xl font-black italic tracking-tighter">EnglishFlow</span>
             </div>
             <nav class="flex gap-4 md:gap-8 text-[10px] font-black uppercase tracking-widest opacity-60">
                 <button onclick="showPage('home')" class="hover:text-indigo-500">Home</button>
                 <button onclick="showPage('library')" class="hover:text-indigo-500">Library</button>
                 <button onclick="showPage('profile')" class="hover:text-indigo-500">Vocab (<span id="dict-count-nav">0</span>)</button>
-                <button onclick="showPage('practice')" class="hover:text-indigo-500 text-indigo-500">Practice</button>
+                <button onclick="showPage('practice')" class="hover:text-indigo-600 text-indigo-500 font-bold">Practice</button>
             </nav>
-            <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700">🌓</button>
+            <button onclick="toggleTheme()" class="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <span class="dark:hidden">🌙</span><span class="hidden dark:inline">☀️</span>
+            </button>
         </div>
     </header>
 
     <main class="max-w-6xl mx-auto p-6">
-        <section id="page-home" class="page-content space-y-8 py-6">
+        <section id="page-home" class="page-content space-y-6 py-4">
             <div id="ai-result" class="hidden space-y-6">
-                <div class="card p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-bold opacity-40 uppercase">Voice:</span>
-                        <select id="voice-select" class="bg-transparent text-[11px] font-bold uppercase outline-none dark:text-white cursor-pointer"></select>
+                <div class="p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-bold opacity-40 uppercase ml-1 mb-1">Select Voice</span>
+                        <select id="voice-select" class="bg-transparent text-[11px] font-bold uppercase outline-none dark:text-white cursor-pointer min-w-[200px]"></select>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-play" onclick="speakText()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase shadow-lg">▶ Play</button>
-                        <button id="btn-stop" onclick="stopText()" class="bg-slate-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase">⏹ Stop</button>
+                        <button id="btn-play" onclick="speakText()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl text-xs font-black uppercase shadow-lg hover:scale-105 transition">▶ Read Aloud</button>
+                        <button onclick="stopText()" class="bg-slate-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase hover:bg-slate-400 transition">⏹ Stop</button>
                     </div>
                 </div>
-                <div class="card p-8 md:p-16 rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
-                    <h2 id="res-title" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 uppercase mb-8 italic"></h2>
-                    <div id="res-text" class="text-2xl md:text-3xl leading-[1.8] font-medium text-slate-700 dark:text-slate-300"></div>
+                <div class="p-8 md:p-14 rounded-[3rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+                    <h2 id="res-title" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 mb-8 italic tracking-tight"></h2>
+                    <div id="res-text" class="text-2xl md:text-3xl leading-[2.1] font-medium text-slate-700 dark:text-slate-300"></div>
                 </div>
             </div>
-            <div id="home-placeholder" class="text-center py-24">
-                <div class="text-7xl mb-6">📚</div>
-                <h3 class="text-2xl font-black uppercase opacity-80 mb-6">Ready to learn? Open Library</h3>
-                <button onclick="showPage('library')" class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-xl">Browse Library</button>
+            <div id="home-placeholder" class="text-center py-32 opacity-30">
+                <h3 class="text-2xl font-black uppercase italic">Pick a story from the Library</h3>
             </div>
         </section>
 
-        <section id="page-library" class="page-content hidden py-6 space-y-12">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <h2 class="text-4xl font-black uppercase italic">Content Library</h2>
-                <div id="cat-filters" class="flex flex-wrap justify-center gap-2">
-                    <button onclick="filterLib('all')" class="cat-btn active">All</button>
-                    <button onclick="filterLib('Geography')" class="cat-btn">Geography</button>
-                    <button onclick="filterLib('Animals')" class="cat-btn">Animals</button>
-                    <button onclick="filterLib('Cooking')" class="cat-btn">Cooking</button>
-                    <button onclick="filterLib('Science')" class="cat-btn">Science</button>
-                </div>
-            </div>
-            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        <section id="page-library" class="page-content hidden py-6">
+            <h2 class="text-4xl font-black uppercase italic mb-10 tracking-tighter">Content Library</h2>
+            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
 
         <section id="page-practice" class="page-content hidden py-10">
-            <div id="quiz-box" class="max-w-2xl mx-auto card p-10 md:p-16 rounded-[2rem] text-center shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <div id="quiz-empty" class="hidden">
-                    <p class="font-bold opacity-60 uppercase text-sm">Save at least 4 words from stories first!</p>
+            <div id="quiz-box" class="max-w-2xl mx-auto p-12 rounded-[3rem] text-center shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div id="quiz-content" class="space-y-10">
+                    <div class="text-[10px] font-black uppercase tracking-widest opacity-40">Translate correctly</div>
+                    <div id="quiz-word" class="text-6xl font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-tighter">...</div>
+                    <div id="quiz-options" class="grid grid-cols-1 gap-4"></div>
                 </div>
-                <div id="quiz-content" class="space-y-8">
-                    <div class="text-[10px] font-black uppercase opacity-30 tracking-widest">Context Practice</div>
-                    <div id="quiz-word" class="text-5xl font-black text-indigo-600 dark:text-indigo-400 uppercase">...</div>
-                    <div id="quiz-hint" class="text-lg italic opacity-70 leading-relaxed text-slate-600 dark:text-slate-400"></div>
-                    <div id="quiz-options" class="grid grid-cols-1 gap-3 mt-10"></div>
-                </div>
+                <div id="quiz-empty" class="hidden py-10 font-bold opacity-40 uppercase">Click words in stories to build your list first!</div>
             </div>
         </section>
 
-        <section id="page-profile" class="page-content hidden py-10 space-y-8">
-            <h3 class="text-3xl font-black uppercase tracking-tighter italic">Personal Dictionary</h3>
-            <div id="dict-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        <section id="page-profile" class="page-content hidden py-10">
+            <h3 class="text-3xl font-black uppercase italic mb-8">Personal Dictionary</h3>
+            <div id="dict-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px] pointer-events-none"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px] pointer-events-none"></div>
 
     <script src="script.js"></script>
 </body>
