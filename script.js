@@ -99,16 +99,21 @@ function renderLibrary() {
     `).join('');
 }
 
+// Исправленная логика открытия (с гарантированным скрытием Home Welcome)
 function openStory(s) {
-    // 1. Сначала переключаем страницу на 'home'
+    // 1. Скрываем все страницы
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-    document.getElementById('page-home').classList.remove('hidden');
+    
+    // 2. Показываем главную
+    const homePage = document.getElementById('page-home');
+    homePage.classList.remove('hidden');
 
-    // 2. Скрываем приветствие и ПОКАЗЫВАЕМ ридер
+    // 3. Управляем внутренними блоками Home
     document.getElementById('home-welcome').classList.add('hidden');
-    document.getElementById('reader-ui').classList.remove('hidden');
+    const readerUi = document.getElementById('reader-ui');
+    readerUi.classList.remove('hidden');
 
-    // 3. Заполняем контент
+    // 4. Заполняем данные
     document.getElementById('story-title').innerText = s.title;
     document.getElementById('story-meta').innerText = `${s.cat} • ${s.lvl}`;
     
@@ -126,7 +131,7 @@ function openStory(s) {
             box.appendChild(document.createTextNode(part));
         }
     });
-    
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 async function saveWord(w) {
@@ -226,6 +231,7 @@ function renderVocab() {
         </div>
     `).join('');
 }
+
 
 
 
