@@ -135,25 +135,34 @@ function openStoryByIndex(index) {
     const box = document.getElementById('story-text');
     box.innerHTML = "";
     
-    // Очистка текста от лишних символов для корректного разбиения
-    const words = s.text.split(/(\s+)/);
-    words.forEach(part => {
-        if (part.trim().length > 0) {
-            const span = document.createElement('span');
-            span.className = "word-span";
-            span.innerText = part;
-            span.onclick = (e) => {
-                e.stopPropagation();
-                saveWord(part.toLowerCase().replace(/[^a-z]/g, ''));
-            };
-            box.appendChild(span);
-        } else {
-            box.appendChild(document.createTextNode(part));
-        }
+    // Разделяем текст на абзацы
+    const paragraphs = s.text.split('\n\n');
+    
+    paragraphs.forEach(pText => {
+        const pElement = document.createElement('p');
+        pElement.style.marginBottom = "1.5rem"; // Отступ между абзацами
+        pElement.style.textAlign = "left";
+        
+        // Разбиваем абзац на слова
+        const words = pText.split(/(\s+)/);
+        words.forEach(part => {
+            if (part.trim().length > 0) {
+                const span = document.createElement('span');
+                span.className = "word-span hover:text-indigo-600 transition cursor-pointer";
+                span.innerText = part;
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    saveWord(part.toLowerCase().replace(/[^a-z]/g, ''));
+                };
+                pElement.appendChild(span);
+            } else {
+                pElement.appendChild(document.createTextNode(part));
+            }
+        });
+        box.appendChild(pElement);
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 function showPage(id) {
     stop();
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
@@ -287,3 +296,4 @@ function showToast(m) {
     t.innerText = m; t.style.opacity = "1";
     setTimeout(() => t.style.opacity = "0", 2000);
 }
+
