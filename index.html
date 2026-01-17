@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EnglishFlow Pro Max</title>
+    <title>EnglishFlow Pro | Final Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +11,7 @@
 
     <header class="border-b border-slate-200 dark:border-slate-800 px-6 py-4 sticky top-0 z-50 backdrop-blur-md bg-white/90 dark:bg-slate-900/90">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div onclick="showPage('home')" class="flex items-center gap-2 cursor-pointer">
+            <div onclick="showPage('home')" class="flex items-center gap-2 cursor-pointer group">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30">EF</div>
                 <span class="text-xl font-black italic tracking-tighter">EnglishFlow</span>
             </div>
@@ -28,30 +28,31 @@
     <main class="max-w-6xl mx-auto p-6">
         <section id="page-home" class="page-content space-y-8 py-6">
             <div id="ai-result" class="hidden space-y-6">
-                <div class="card p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <div class="card p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                     <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-bold opacity-40 uppercase">Voice Selection:</span>
+                        <span class="text-[10px] font-bold opacity-40 uppercase">Voice:</span>
                         <select id="voice-select" class="bg-transparent text-[11px] font-bold uppercase outline-none dark:text-white cursor-pointer"></select>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-play" onclick="speakText()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase shadow-lg hover:scale-105 transition">▶ Play</button>
-                        <button id="btn-stop" onclick="stopText()" class="bg-slate-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase hover:bg-slate-400 transition">⏹ Stop</button>
+                        <button id="btn-play" onclick="speakText()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase shadow-lg">▶ Play</button>
+                        <button id="btn-stop" onclick="stopText()" class="bg-slate-500 text-white px-6 py-3 rounded-xl text-xs font-black uppercase">⏹ Stop</button>
                     </div>
                 </div>
-                <div class="card p-8 md:p-16 rounded-[3rem] shadow-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <div class="card p-8 md:p-16 rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
                     <h2 id="res-title" class="text-3xl font-black text-indigo-600 dark:text-indigo-400 uppercase mb-8 italic"></h2>
                     <div id="res-text" class="text-2xl md:text-3xl leading-[1.8] font-medium text-slate-700 dark:text-slate-300"></div>
                 </div>
             </div>
             <div id="home-placeholder" class="text-center py-24">
-                <div class="text-7xl mb-6">📖</div>
-                <h3 class="text-2xl font-black uppercase opacity-80">Open Library to start reading</h3>
+                <div class="text-7xl mb-6">📚</div>
+                <h3 class="text-2xl font-black uppercase opacity-80 mb-6">Ready to learn? Open Library</h3>
+                <button onclick="showPage('library')" class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-xl">Browse Library</button>
             </div>
         </section>
 
         <section id="page-library" class="page-content hidden py-6 space-y-12">
             <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <h2 class="text-4xl font-black uppercase italic">Library</h2>
+                <h2 class="text-4xl font-black uppercase italic">Content Library</h2>
                 <div id="cat-filters" class="flex flex-wrap justify-center gap-2">
                     <button onclick="filterLib('all')" class="cat-btn active">All</button>
                     <button onclick="filterLib('Geography')" class="cat-btn">Geography</button>
@@ -60,36 +61,30 @@
                     <button onclick="filterLib('Science')" class="cat-btn">Science</button>
                 </div>
             </div>
-            <div id="library-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </section>
 
         <section id="page-practice" class="page-content hidden py-10">
-            <div id="quiz-box" class="max-w-2xl mx-auto card p-10 md:p-16 rounded-[3rem] text-center shadow-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-                <div id="quiz-empty" class="hidden py-10">
-                    <p class="font-bold opacity-60 uppercase text-sm tracking-widest">Save 4 words with translation to start!</p>
+            <div id="quiz-box" class="max-w-2xl mx-auto card p-10 md:p-16 rounded-[2rem] text-center shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div id="quiz-empty" class="hidden">
+                    <p class="font-bold opacity-60 uppercase text-sm">Save at least 4 words from stories first!</p>
                 </div>
                 <div id="quiz-content" class="space-y-8">
-                    <div class="text-[10px] font-black uppercase opacity-30 tracking-widest">Select Correct Translation</div>
+                    <div class="text-[10px] font-black uppercase opacity-30 tracking-widest">Context Practice</div>
                     <div id="quiz-word" class="text-5xl font-black text-indigo-600 dark:text-indigo-400 uppercase">...</div>
                     <div id="quiz-hint" class="text-lg italic opacity-70 leading-relaxed text-slate-600 dark:text-slate-400"></div>
-                    <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10"></div>
+                    <div id="quiz-options" class="grid grid-cols-1 gap-3 mt-10"></div>
                 </div>
             </div>
         </section>
 
         <section id="page-profile" class="page-content hidden py-10 space-y-8">
-            <div class="card p-6 rounded-2xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <div class="flex gap-2">
-                    <input type="text" id="manual-word-input" placeholder="Enter English word..." class="flex-1 p-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none font-bold focus:ring-2 ring-indigo-500">
-                    <button onclick="addWordManually()" class="bg-indigo-600 text-white px-8 rounded-xl font-black uppercase text-xs">Add</button>
-                </div>
-            </div>
-            <h3 class="text-3xl font-black uppercase tracking-tighter">My Dictionary (<span id="dict-count-main">0</span>)</h3>
+            <h3 class="text-3xl font-black uppercase tracking-tighter italic">Personal Dictionary</h3>
             <div id="dict-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px]"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-8 py-4 rounded-2xl shadow-2xl opacity-0 transition-all font-black z-[100] uppercase text-[10px] pointer-events-none"></div>
 
     <script src="script.js"></script>
 </body>
