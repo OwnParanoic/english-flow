@@ -30,32 +30,31 @@ const stories = [
     { title: "Startup Culture", cat: "Work", lvl: "Hard", text: "Startups are small companies designed to grow fast. They often have informal offices but require long hours and hard work." },
 
     // SPACE
-    { title: "The Red Planet", cat: "Space", lvl: "Medium", text: "Mars is often called the Red Planet because of iron oxide on its surface. NASA has sent several rovers, like Curiosity and Perseverance, to explore its dry lakes and search for signs of ancient life." },
-    { title: "The Moon Landing", cat: "Space", lvl: "Easy", text: "In 1969, Neil Armstrong became the first human to step on the moon. He said, 'That's one small step for man, one giant leap for mankind.' It was a historic moment for all of humanity." },
-    { title: "Saturn's Rings", cat: "Space", lvl: "Medium", text: "Saturn is famous for its bright and complex rings. These rings are made of billions of small chunks of ice and rock, ranging in size from a grain of sand to a large house." },
+    { title: "The Red Planet", cat: "Space", lvl: "Medium", text: "Mars is often called the Red Planet because of iron oxide on its surface. NASA has sent several rovers, like Curiosity and Perseverance, to explore its dry lakes." },
+    { title: "The Moon Landing", cat: "Space", lvl: "Easy", text: "In 1969, Neil Armstrong became the first human to step on the moon. It was a historic moment for all of humanity." },
+    { title: "Saturn's Rings", cat: "Space", lvl: "Medium", text: "Saturn is famous for its bright and complex rings. These rings are made of billions of small chunks of ice and rock." },
 
-    // MEDICINE & HEALTH
-    { title: "How Vaccines Work", cat: "Medicine", lvl: "Hard", text: "Vaccines train your immune system to recognize and fight pathogens, such as viruses or bacteria. They introduce a tiny, harmless piece of the germ into the body so the immune system can practice fighting it." },
-    { title: "Healthy Sleep", cat: "Medicine", lvl: "Easy", text: "Sleep is very important for your brain and body. Most adults need seven to nine hours of sleep every night. Good sleep helps you learn better and keeps your heart healthy." },
-    { title: "The Human Heart", cat: "Medicine", lvl: "Medium", text: "Your heart is a muscle that pumps blood to your whole body. It beats about 100,000 times a day. To keep it strong, you should exercise regularly and eat healthy food." },
-    { title: "Discovery of Penicillin", cat: "Medicine", lvl: "Hard", text: "Alexander Fleming discovered the first antibiotic, penicillin, by accident in 1928. This discovery changed medicine forever, allowing doctors to cure infections that were once deadly." },
+    // MEDICINE
+    { title: "How Vaccines Work", cat: "Medicine", lvl: "Hard", text: "Vaccines train your immune system to recognize and fight pathogens. They introduce a tiny, harmless piece of the germ into the body." },
+    { title: "Healthy Sleep", cat: "Medicine", lvl: "Easy", text: "Sleep is very important for your brain and body. Most adults need seven to nine hours of sleep every night. Good sleep helps you learn better." },
+    { title: "The Human Heart", cat: "Medicine", lvl: "Medium", text: "Your heart is a muscle that pumps blood to your whole body. It beats about 100,000 times a day. To keep it strong, exercise regularly." },
 
     // PSYCHOLOGY
-    { title: "Body Language", cat: "Psychology", lvl: "Medium", text: "Non-verbal communication, or body language, makes up a huge part of how we talk to each other. Your posture, eye contact, and hand gestures can tell people if you are nervous, happy, or angry." },
-    { title: "The Placebo Effect", cat: "Psychology", lvl: "Hard", text: "The placebo effect happens when a person's health improves after taking a 'fake' treatment, like a sugar pill, simply because they believe it will work. It shows how powerful the mind is in healing." },
+    { title: "Body Language", cat: "Psychology", lvl: "Medium", text: "Non-verbal communication, or body language, makes up a huge part of how we talk to each other. Your posture and gestures tell a lot." },
+    { title: "The Placebo Effect", cat: "Psychology", lvl: "Hard", text: "The placebo effect happens when a person's health improves after taking a fake treatment simply because they believe it will work." },
 
     // HISTORY
-    { title: "The Silk Road", cat: "History", lvl: "Medium", text: "The Silk Road was an ancient network of trade routes that connected Europe and Asia. It allowed people to trade silk, spices, and even ideas and inventions between different cultures." },
-    { title: "The Vikings", cat: "History", lvl: "Medium", text: "Vikings were famous explorers and warriors from Scandinavia. They traveled across the ocean in longships and were the first Europeans to reach North America, long before Columbus." },
+    { title: "The Silk Road", cat: "History", lvl: "Medium", text: "The Silk Road was an ancient network of trade routes that connected Europe and Asia. It allowed people to trade silk and spices." },
+    { title: "The Vikings", cat: "History", lvl: "Medium", text: "Vikings were famous explorers and warriors from Scandinavia. They traveled across the ocean in longships and reached North America." },
 
     // TECH
-    { title: "How Wi-Fi Works", cat: "Tech", lvl: "Medium", text: "Wi-Fi uses radio waves to send information between your device and a router. It allows us to connect to the internet without any cables, making it easy to work and study from anywhere." },
-    { title: "The Future of AI", cat: "Tech", lvl: "Hard", text: "Artificial Intelligence is growing fast. In the future, AI might help doctors perform surgeries, drive cars safely, and even help us solve complex problems like climate change." },
-    
+    { title: "How Wi-Fi Works", cat: "Tech", lvl: "Medium", text: "Wi-Fi uses radio waves to send information between your device and a router. It allows us to connect to the internet without any cables." },
+    { title: "The Future of AI", cat: "Tech", lvl: "Hard", text: "Artificial Intelligence is growing fast. In the future, AI might help doctors perform surgeries and drive cars safely." },
+
     // LIFESTYLE
     { title: "Morning Routine", cat: "Life", lvl: "Easy", text: "Having a good morning routine can help you stay productive. Many people start their day with a glass of water and exercise." },
     { title: "Benefits of Tea", cat: "Life", lvl: "Easy", text: "Tea is the most popular drink in the world after water. Green tea is known for having many antioxidants that are good for health." },
-    
+
     // COOKING
     { title: "Cooking Pasta", cat: "Cooking", lvl: "Easy", text: "To cook pasta, boil water with a little salt. Add the pasta and cook for ten minutes. Serve with your favorite sauce." },
     { title: "Baking Bread", cat: "Cooking", lvl: "Medium", text: "Making bread requires flour, water, yeast, and salt. You must knead the dough and let it rise before baking in a hot oven." }
@@ -64,26 +63,30 @@ const stories = [
 let vocab = JSON.parse(localStorage.getItem('ef_v20')) || [];
 let currentCategory = 'All';
 let voices = [];
+let isReading = false;
 
-// Инициализация приложения
 document.addEventListener('DOMContentLoaded', () => {
     renderCategoryNav();
     renderLibrary();
     updateCount();
     
-    // Загрузка голосов
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    loadVoices();
+    // Инициализация голосов
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
 });
 
 function loadVoices() {
-    voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
-    const voiceSelect = document.getElementById('voice-select');
-    if (voiceSelect && voices.length > 0) {
-        voiceSelect.innerHTML = voices.map((v, i) => 
-            `<option value="${i}">${v.name.replace('Google ', '')}</option>`
-        ).join('');
-    }
+    setTimeout(() => {
+        voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
+        const voiceSelect = document.getElementById('voice-select');
+        if (voiceSelect) {
+            voiceSelect.innerHTML = voices.map((v, i) => 
+                `<option value="${i}">${v.name.replace(/Microsoft|Google|Apple|Desktop/g, '').trim()}</option>`
+            ).join('');
+        }
+    }, 100);
 }
 
 function renderCategoryNav() {
@@ -108,7 +111,7 @@ function renderLibrary() {
     
     grid.innerHTML = filtered.map(s => {
         const lvlColor = s.lvl === 'Easy' ? 'text-green-500' : s.lvl === 'Medium' ? 'text-orange-500' : 'text-red-500';
-        const globalIndex = stories.indexOf(s); // Важно для правильного открытия
+        const globalIndex = stories.indexOf(s);
         return `
             <div class="story-card" onclick="openStoryByIndex(${globalIndex})">
                 <div class="card-meta">${s.cat} • <span class="${lvlColor}">${s.lvl}</span></div>
@@ -122,22 +125,19 @@ function openStoryByIndex(index) {
     const s = stories[index];
     if (!s) return;
 
-    // Переход на страницу Home (где ридер)
     showPage('home');
-    
-    // Скрываем Welcome, показываем Reader UI
     document.getElementById('home-welcome').classList.add('hidden');
     document.getElementById('reader-ui').classList.remove('hidden');
 
-    // Наполняем контент
     document.getElementById('story-title').innerText = s.title;
     document.getElementById('story-meta').innerText = `${s.cat} • ${s.lvl}`;
     
     const box = document.getElementById('story-text');
     box.innerHTML = "";
     
-    // Разбиваем на слова
-    s.text.split(/(\s+)/).forEach(part => {
+    // Очистка текста от лишних символов для корректного разбиения
+    const words = s.text.split(/(\s+)/);
+    words.forEach(part => {
         if (part.trim().length > 0) {
             const span = document.createElement('span');
             span.className = "word-span";
@@ -155,7 +155,7 @@ function openStoryByIndex(index) {
 }
 
 function showPage(id) {
-    stop(); // Остановить звук при переходе
+    stop();
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     const target = document.getElementById(`page-${id}`);
     if (target) target.classList.remove('hidden');
@@ -184,44 +184,45 @@ async function saveWord(w) {
     } catch(e) {}
 }
 
-// ОЗВУЧКА С ПОДСВЕТКОЙ
 function speak() {
     stop();
     const textElement = document.getElementById('story-text');
+    const wordSpans = textElement.querySelectorAll('.word-span');
+    if (wordSpans.length === 0) return;
+
     const utterance = new SpeechSynthesisUtterance(textElement.innerText);
-    
     const voiceIndex = document.getElementById('voice-select').value;
-    if (voices[voiceIndex]) utterance.voice = voices[voiceIndex];
     
+    if (voices[voiceIndex]) utterance.voice = voices[voiceIndex];
     utterance.rate = 0.85;
+    isReading = true;
 
     utterance.onboundary = (event) => {
-        if (event.name === 'word') {
-            const charIndex = event.charIndex;
-            const words = textElement.querySelectorAll('.word-span');
-            let currentChars = 0;
+        if (!isReading || event.name !== 'word') return;
+        
+        // Надежный расчет индекса слова для Chrome/Edge
+        const charIndex = event.charIndex;
+        const textUpToChar = textElement.innerText.substring(0, charIndex);
+        const currentWordIndex = textUpToChar.split(/\s+/).filter(x => x.length > 0).length;
 
-            words.forEach(span => {
-                const len = span.innerText.length;
-                if (charIndex >= currentChars && charIndex < currentChars + len + 1) {
-                    document.querySelectorAll('.reading-now').forEach(el => el.classList.remove('reading-now'));
-                    span.classList.add('reading-now');
-                }
-                currentChars += len + 1;
-            });
+        wordSpans.forEach(s => s.classList.remove('reading-now'));
+        if (wordSpans[currentWordIndex]) {
+            wordSpans[currentWordIndex].classList.add('reading-now');
+            wordSpans[currentWordIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     };
 
-    utterance.onend = () => stop();
+    utterance.onend = stop;
+    utterance.onerror = stop;
     window.speechSynthesis.speak(utterance);
 }
 
 function stop() {
+    isReading = false;
     window.speechSynthesis.cancel();
     document.querySelectorAll('.reading-now').forEach(el => el.classList.remove('reading-now'));
 }
 
-// ПРАКТИКА
 function runQuiz() {
     const active = document.getElementById('quiz-active');
     const none = document.getElementById('quiz-none');
