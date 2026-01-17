@@ -62,33 +62,50 @@ function generateAIContent() {
 }
 
 function renderArt() {
-    document.getElementById('res-title').innerText = currentArt.title;
-    document.getElementById('res-text').innerHTML = currentArt.text.split(' ').map(w => 
-        `<span class="word-span" onclick="saveWord('${w.replace(/[^\w]/g, '')}')">${w}</span>`
-    ).join(' ');
-    document.getElementById('res-quiz').innerHTML = currentArt.quiz.map((q, i) => `
-        <div class="space-y-4">
-            <p class="font-bold text-lg">"${q.q}" <span class="quiz-translation ${isTranslated?'reveal':''}">/ ${q.qRu}</span></p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                ${q.o.map((opt, oi) => `<button onclick="selectAns(this, ${i}, ${oi})" class="opt-btn p-4 rounded-2xl text-left bg-white/5">${opt}</button>`).join('')}
-            </div>
-        </div>
-    `).join('');
-    selectedAns = [];
-    document.getElementById('check-btn').disabled = false;
-    document.getElementById('quiz-score').innerText = "";
+    const titleEl = document.getElementById('res-title');
+    const textEl = document.getElementById('res-text');
+    
+    titleEl.innerText = currentArt.title;
+    textEl.innerHTML = ""; // Полная очистка
+
+    // Разбиваем текст на слова и создаем элементы вручную
+    currentArt.text.split(' ').forEach((word, index) => {
+        const span = document.createElement('span');
+        span.className = "word-span";
+        span.innerText = word;
+        
+        // Чистим слово от знаков препинания для словаря
+        const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+        
+        // Если слово уже есть в словаре, подсвечиваем сразу
+        if (vocabulary.includes(cleanWord)) {
+            span.classList.add('word-saved');
+        }
+
+        span.onclick = (e) => {
+            saveWord(cleanWord);
+            e.target.classList.add('word-saved'); // Визуальный отклик
+        };
+
+        textEl.appendChild(span);
+        textEl.appendChild(document.createTextNode(' ')); // Пробел между словами
+    });
+
+    // Рендер квиза (без изменений)
+    renderQuiz(); 
 }
 
 function saveWord(w) {
-    if(!w || w.length < 2) return;
-    const low = w.toLowerCase();
-    if(!vocabulary.includes(low)) {
-        vocabulary.push(low);
+    if (!w || w.length < 2) return;
+    
+    if (!vocabulary.includes(w)) {
+        vocabulary.push(w);
         localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary));
         updateUI();
-        showToast(`Saved: ${low}`);
+        showToast(`Saved to Dictionary: ${w}`);
     }
-    window.open(`https://context.reverso.net/translation/english-russian/${low}`, '_blank');
+    // Открываем перевод в новой вкладке
+    window.open(`https://context.reverso.net/translation/english-russian/${w}`, '_blank');
 }
 
 function renderAnalytics() {
@@ -211,4 +228,5 @@ function showToast(m) {
     const t = document.getElementById('toast');
     t.innerText = m; t.classList.remove('opacity-0');
     setTimeout(() => t.classList.add('opacity-0'), 2000);
+
 }
