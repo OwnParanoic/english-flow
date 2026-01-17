@@ -48,12 +48,22 @@ function renderLibrary() {
 }
 
 function openStory(s) {
+    // Сначала переключаемся на страницу Home
     showPage('home');
+    
+    // Скрываем приветствие и показываем ридер
+    document.getElementById('home-welcome').classList.add('hidden');
+    document.getElementById('reader-ui').classList.remove('hidden');
+    
+    // Наполняем данными
     document.getElementById('story-title').innerText = s.title;
+    document.getElementById('story-meta').innerText = `${s.cat} • ${s.lvl}`;
+    
     const box = document.getElementById('story-text');
     box.innerHTML = "";
     
     let pos = 0;
+    // Разбиваем текст на слова для кликабельности
     s.text.split(/(\s+)/).forEach(part => {
         if (part.trim().length > 0) {
             const span = document.createElement('span');
@@ -125,18 +135,23 @@ function checkAnswer(btn, selected, correct) {
 
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 function showPage(id) {
+    // Остановить озвучку при переходе на любую страницу
+    stop();
+    
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     document.getElementById(`page-${id}`).classList.remove('hidden');
+
+    // Если переходим на Home вручную (через меню), показываем приветствие и скрываем ридер
+    if (id === 'home') {
+        document.getElementById('home-welcome').classList.remove('hidden');
+        document.getElementById('reader-ui').classList.add('hidden');
+    }
+    
     if (id === 'practice') runQuiz();
     if (id === 'profile') renderVocab();
-}
-
-function speak() {
-    const text = document.getElementById('story-text').innerText;
-    window.speechSynthesis.cancel();
-    const ut = new SpeechSynthesisUtterance(text);
-    ut.rate = 0.8;
-    window.speechSynthesis.speak(ut);
+    
+    // Скролл в начало страницы
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function stop() { window.speechSynthesis.cancel(); }
@@ -162,3 +177,4 @@ function renderVocab() {
         </div>
     `).join('');
 }
+
