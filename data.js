@@ -509,6 +509,7 @@ const stories4 = [
 
 // В самом низу файла data.js, после всех массивов:
 
-
 var allStories = [...stories1, ...stories2, ...stories3, ...stories4];
 var stories = allStories;
+
+console.log("Библиотека загружена. Всего текстов:", window.stories.length);
