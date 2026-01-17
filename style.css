@@ -2,38 +2,41 @@
 
 body { font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
 
+/* КНОПКИ КАТЕГОРИЙ */
 .cat-btn {
-    padding: 10px 20px; border-radius: 12px; font-size: 10px; font-weight: 800;
-    text-transform: uppercase; border: 1px solid #e2e8f0; opacity: 0.5;
+    padding: 10px 16px; border-radius: 12px; font-size: 10px; font-weight: 800;
+    text-transform: uppercase; border: 1px solid #e2e8f0; opacity: 0.6; color: inherit;
 }
-.dark .cat-btn { border-color: #1e293b; color: white; }
-.cat-btn.active { background: #6366f1; color: white !important; opacity: 1; border-color: #6366f1; }
+.dark .cat-btn { border-color: #1e293b; color: #fff; }
+.cat-btn.active { background: #6366f1; color: #fff !important; opacity: 1; border-color: #6366f1; }
 
+/* КАРТОЧКИ В БИБЛИОТЕКЕ */
 .topic-card {
-    padding: 2.5rem 1.5rem; border-radius: 2rem; border: 1px solid #e2e8f0;
-    cursor: pointer; transition: 0.3s; background: white; text-align: center;
+    padding: 2.5rem 1.5rem; border-radius: 1.5rem; border: 1px solid #e2e8f0;
+    cursor: pointer; transition: all 0.3s ease; background: #fff; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.dark .topic-card { background: #0f172a; border-color: #1e293b; color: white; }
-.topic-card:hover { transform: translateY(-5px); border-color: #6366f1; }
+.dark .topic-card { background: #0f172a; border-color: #1e293b; color: #fff; }
+.topic-card:hover { transform: translateY(-8px); border-color: #6366f1; box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.4); }
 
 .word-span { cursor: pointer; transition: 0.1s; padding: 2px 4px; border-radius: 6px; display: inline-block; }
 
-/* ПОДСВЕТКА СЛОВ - ПРИНУДИТЕЛЬНО */
+/* ПОДСВЕТКА */
 .word-reading {
     background-color: #6366f1 !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-    transform: scale(1.1);
-    transition: all 0.1s ease-in-out;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+    transform: scale(1.05);
 }
 
+/* КНОПКИ В ТЕСТЕ */
 .option-btn {
-    padding: 1.5rem; border-radius: 1.5rem; border: 2px solid #e2e8f0;
-    font-weight: 800; transition: 0.2s; text-align: center;
+    padding: 1.25rem; border-radius: 1rem; border: 2px solid #e2e8f0;
+    font-weight: 800; transition: 0.2s; text-align: center; background: transparent; color: inherit;
 }
-.dark .option-btn { border-color: #1e293b; background: #1e293b; color: white; }
-.option-btn:hover { border-color: #6366f1; }
-.option-btn.correct { background: #10b981 !important; border-color: #10b981 !important; color: white !important; }
-.option-btn.wrong { background: #ef4444 !important; border-color: #ef4444 !important; color: white !important; }
+.dark .option-btn { border-color: #1e293b; background: #1e293b; color: #fff; }
+.option-btn:hover { border-color: #6366f1; background: #6366f110; }
+.option-btn.correct { background: #10b981 !important; border-color: #10b981 !important; color: #fff !important; }
+.option-btn.wrong { background: #ef4444 !important; border-color: #ef4444 !important; color: #fff !important; }
 
 .page-content.hidden { display: none; }
