@@ -54,7 +54,7 @@ const stories = [
     { title: "The Future of AI", cat: "Tech", lvl: "Hard", text: "Artificial Intelligence is growing fast. In the future, AI might help doctors perform surgeries, drive cars safely, and even help us solve complex problems like climate change." },
     // LIFESTYLE
     { title: "Morning Routine", cat: "Life", lvl: "Easy", text: "Having a good morning routine can help you stay productive. Many people start their day with a glass of water and exercise." },
-    { title: "Benefits of Tea", cat: "Life", lvl: "Easy", text: "Tea is the most popular drink in the world after water. Green tea is known for having many antioxidants that are good for health." }
+    { title: "Benefits of Tea", cat: "Life", lvl: "Easy", text: "Tea is the most popular drink in the world after water. Green tea is known for having many antioxidants that are good for health." },
     
     // COOKING
     { title: "Cooking Pasta", cat: "Cooking", lvl: "Easy", text: "To cook pasta, boil water with a little salt. Add the pasta and cook for ten minutes. Serve with your favorite sauce." },
@@ -235,6 +235,7 @@ function renderVocab() {
         </div>
     `).join('');
 }
+
 
 
 
