@@ -1,4 +1,4 @@
-
+const stories = window.stories || [];
 
 let vocab = JSON.parse(localStorage.getItem('ef_v20')) || [];
 let currentCategory = 'All';
@@ -236,5 +236,6 @@ function showToast(m) {
     t.innerText = m; t.style.opacity = "1";
     setTimeout(() => t.style.opacity = "0", 2000);
 }
+
 
 
