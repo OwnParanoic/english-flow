@@ -69,64 +69,86 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* ---------- Speak ---------- */
-
 function speak() {
     ttsStop();
 
     const box = document.getElementById('story-text');
     if (!box) return;
 
-    const fullText = box.innerText.trim();
-    if (!fullText) return;
+    const wordSpans = Array.from(box.querySelectorAll('.word-span'));
+    if (!wordSpans.length) return;
 
-    const sentences = fullText.match(/[^.!?]+[.!?]*/g);
-    if (!sentences) return;
+    // полный текст, разбитый на слова
+    const allWords = wordSpans.map(w => w.innerText);
+    const sentences = [];
+    let buffer = [];
+    let startIndex = 0;
 
-    const wordSpans = box.querySelectorAll('.word-span');
-    let sentenceIndex = 0;
+    // группируем слова в предложения
+    allWords.forEach((word, i) => {
+        buffer.push(word);
+        if (/[.!?]$/.test(word)) {
+            sentences.push({
+                text: buffer.join(' '),
+                start: startIndex,
+                length: buffer.length
+            });
+            startIndex += buffer.length;
+            buffer = [];
+        }
+    });
+
+    if (buffer.length) {
+        sentences.push({
+            text: buffer.join(' '),
+            start: startIndex,
+            length: buffer.length
+        });
+    }
+
+    let sIndex = 0;
     ttsActive = true;
 
-    const speakSentence = () => {
-        if (!ttsActive || sentenceIndex >= sentences.length) {
+    const speakNext = () => {
+        if (!ttsActive || sIndex >= sentences.length) {
             ttsStop();
             return;
         }
 
-        const sentence = sentences[sentenceIndex];
-        const utter = new SpeechSynthesisUtterance(sentence);
+        const s = sentences[sIndex];
+        const utter = new SpeechSynthesisUtterance(s.text);
         ttsUtterance = utter;
 
         const voiceIndex = document.getElementById('voice-select')?.value;
         if (ttsVoices[voiceIndex]) utter.voice = ttsVoices[voiceIndex];
         utter.rate = 0.85;
 
-        /* ---- Word highlight (Chrome / Edge) ---- */
+        /* ---- WORD highlight (Chrome / Edge) ---- */
         utter.onboundary = e => {
             if (!TTS_FEATURES.word) return;
             if (e.name !== 'word') return;
 
-            const charIndex = e.charIndex;
-            const before = fullText.slice(0, charIndex);
-            const wordIndex = before.split(/\s+/).filter(Boolean).length;
+            const spoken = s.text.slice(0, e.charIndex);
+            const localIndex = spoken.split(/\s+/).filter(Boolean).length;
+            const globalIndex = s.start + localIndex;
 
             wordSpans.forEach(w => w.classList.remove('reading-now'));
-            if (wordSpans[wordIndex]) {
-                wordSpans[wordIndex].classList.add('reading-now');
-                wordSpans[wordIndex].scrollIntoView({ block: 'center' });
+            if (wordSpans[globalIndex]) {
+                wordSpans[globalIndex].classList.add('reading-now');
+                wordSpans[globalIndex].scrollIntoView({ block: 'center' });
             }
         };
 
         /* ---- Sentence highlight (Safari / Yandex) ---- */
         utter.onstart = () => {
             if (TTS_FEATURES.sentence) {
-                highlightSentence(sentence);
+                highlightSentence(s.text);
             }
         };
 
         utter.onend = () => {
-            sentenceIndex++;
-            speakSentence();
+            sIndex++;
+            speakNext();
         };
 
         utter.onerror = ttsStop;
@@ -134,7 +156,7 @@ function speak() {
         speechSynthesis.speak(utter);
     };
 
-    speakSentence();
+    speakNext();
 }
 
 /* ---------- Stop ---------- */
