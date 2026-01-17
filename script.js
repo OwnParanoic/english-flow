@@ -1,33 +1,33 @@
 let vocabulary = JSON.parse(localStorage.getItem('ef_vocabulary')) || [];
 let voices = [];
 let currentText = "";
-let currentLevel = "A1";
+let isPaused = false;
 
-// Мощная база данных (100+ тем распределены по категориям)
-const libraryDB = [];
-const categories = ['Geography', 'Animals', 'Cooking', 'Work', 'Study'];
-const levels = ['Easy', 'Medium', 'Hard'];
+// БАЗА ДАННЫХ И ТЕМЫ
+const libraryDB = [
+    { cat: 'Geography', title: 'The Sahara Desert', level: 'Medium', text: 'The Sahara is the largest hot desert in the world. It covers much of North Africa. The climate is extremely dry and hot.' },
+    { cat: 'Animals', title: 'Mountain Gorillas', level: 'Hard', text: 'Mountain gorillas live in high-altitude forests. They are highly social and intelligent creatures living in family groups.' },
+    { cat: 'Science', title: 'Quantum Computers', level: 'Hard', text: 'Quantum computers use qubits to perform calculations. They can process information much faster than traditional supercomputers.' }
+];
 
-// Генерируем качественную базу на 105 элементов
-categories.forEach(cat => {
-    levels.forEach(lvl => {
-        for(let i = 1; i <= 7; i++) {
-            libraryDB.push({
-                id: `${cat}-${lvl}-${i}`,
-                cat: cat,
-                level: lvl,
-                title: `${cat} Lesson ${i}`,
-                text: generateContent(cat, lvl, i)
-            });
-        }
+const topics = {
+    'Geography': ['Pacific Islands', 'Grand Canyon', 'Icelandic Glaciers', 'African Savanna', 'The Alps', 'Rivers of Europe'],
+    'Animals': ['Giant Pandas', 'Blue Whales', 'Desert Foxes', 'Arctic Wolves', 'Monarch Butterflies', 'Golden Eagles'],
+    'Cooking': ['French Pastry', 'Mexican Tacos', 'Greek Salad', 'Indian Spices', 'Brewing Coffee', 'Healthy Smoothies'],
+    'Work': ['Freelance Life', 'Job Efficiency', 'Leadership Skills', 'Global Economy', 'Networking Tips', 'Business Growth'],
+    'Science': ['Genetic Code', 'Climate Change', 'Neural Networks', 'Space Travel', 'Atomic Structure', 'Robotics Future']
+};
+
+Object.keys(topics).forEach(cat => {
+    topics[cat].forEach((name, i) => {
+        libraryDB.push({
+            cat: cat,
+            title: name,
+            level: i % 2 === 0 ? 'Medium' : 'Easy',
+            text: `Learning about ${name} is a great way to improve your ${cat.toLowerCase()} knowledge. This topic is essential for modern education. Understanding the details of ${name} will help you expand your vocabulary and speak more fluently. We recommend practicing this text several times until you feel confident with every word.`
+        });
     });
 });
-
-function generateContent(cat, lvl, i) {
-    if(lvl === 'Easy') return `In this lesson about ${cat.toLowerCase()}, we learn simple things. Lesson ${i} is very good for beginners. You can read this text and understand every word. People like ${cat.toLowerCase()} because it is interesting and very fun to study every day.`;
-    if(lvl === 'Medium') return `The study of ${cat.toLowerCase()} has become increasingly important in our modern world. In this section, lesson ${i} explores the intermediate concepts that define the field. Many professionals suggest that understanding ${cat.toLowerCase()} requires consistent practice and attention to detail.`;
-    return `Advanced analysis of ${cat.toLowerCase()} reveals a complex intersection of theoretical principles and practical applications. In lesson ${i}, we examine the paradigm shifts that have influenced the evolution of ${cat.toLowerCase()} throughout history. Scholars argue that a comprehensive mastery of this subject is essential for intellectual growth.`;
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     if(localStorage.getItem('ef_theme') === 'light') document.documentElement.classList.remove('dark');
@@ -49,20 +49,14 @@ function filterLib(cat) {
         b.classList.remove('active');
         if(b.innerText.toLowerCase() === cat.toLowerCase() || (cat === 'all' && b.innerText === 'All')) b.classList.add('active');
     });
-
     const grid = document.getElementById('library-grid');
     grid.innerHTML = "";
-    
-    const filtered = cat === 'all' ? libraryDB : libraryDB.filter(item => item.cat === cat);
-    
+    const filtered = cat === 'all' ? libraryDB : libraryDB.filter(i => i.cat === cat);
     filtered.forEach(item => {
         const div = document.createElement('div');
         div.className = "topic-card";
         div.onclick = () => openTopic(item);
-        div.innerHTML = `
-            <div class="text-[9px] font-black uppercase opacity-30 mb-2">${item.cat} • ${item.level}</div>
-            <h4 class="font-bold text-lg">${item.title}</h4>
-        `;
+        div.innerHTML = `<div class="text-[9px] opacity-30 mb-2 uppercase font-black">${item.cat} • ${item.level}</div><h4 class="font-bold text-sm">${item.title}</h4>`;
         grid.appendChild(div);
     });
 }
@@ -72,96 +66,84 @@ function openTopic(item) {
     document.getElementById('home-placeholder').classList.add('hidden');
     document.getElementById('ai-result').classList.remove('hidden');
     document.getElementById('res-title').innerText = item.title;
-    document.getElementById('res-level').innerText = item.level;
-    
     currentText = item.text;
     const container = document.getElementById('res-text');
     container.innerHTML = "";
-    
     item.text.split(' ').forEach((word, i) => {
         const span = document.createElement('span');
-        const clean = word.toLowerCase().replace(/[^a-z]/g, '');
         span.className = "word-span";
         span.id = `word-${i}`;
-        if(vocabulary.includes(clean)) span.classList.add('word-saved');
         span.innerText = word;
-        span.onclick = (e) => { saveWord(clean); span.classList.add('word-saved'); };
+        span.onclick = () => saveWord(word.toLowerCase().replace(/[^a-z]/g, ''));
         container.appendChild(span);
         container.appendChild(document.createTextNode(' '));
     });
 }
 
+// ПЛЕЕР
 function speakText() {
     window.speechSynthesis.cancel();
+    isPaused = false;
+    updateVoiceButtons('playing');
     const utterance = new SpeechSynthesisUtterance(currentText);
-    const select = document.getElementById('voice-select');
-    if(voices[select.value]) utterance.voice = voices[select.value];
-    
-    utterance.onboundary = (event) => {
-        if(event.name === 'word') {
+    utterance.voice = voices[document.getElementById('voice-select').value];
+    utterance.rate = 0.9;
+    utterance.onboundary = (e) => {
+        if (e.name === 'word') {
+            const idx = currentText.substring(0, e.charIndex).trim().split(/\s+/).length - 1;
             document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
-            const idx = currentText.substring(0, event.charIndex).trim().split(' ').length - 1;
-            const target = document.getElementById(`word-${idx >= 0 ? idx : 0}`);
-            if(target) {
-                target.classList.add('word-reading');
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            const target = document.getElementById(`word-${idx < 0 ? 0 : idx}`);
+            if (target) { target.classList.add('word-reading'); target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         }
     };
-    
-    utterance.onend = () => document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
+    utterance.onend = () => stopText();
     window.speechSynthesis.speak(utterance);
 }
 
-function saveWord(w) {
-    if(!w || w.length < 2) return;
-    if(!vocabulary.includes(w)) {
-        vocabulary.push(w);
-        localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary));
-        updateUI();
-        showToast(`Saved: ${w}`);
-    }
-    window.open(`https://context.reverso.net/translation/english-russian/${w}`, '_blank');
+function pauseText() { if (window.speechSynthesis.speaking) { window.speechSynthesis.pause(); updateVoiceButtons('paused'); } }
+function resumeText() { if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); updateVoiceButtons('playing'); } }
+function stopText() { window.speechSynthesis.cancel(); document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading')); updateVoiceButtons('stopped'); }
+
+function updateVoiceButtons(state) {
+    const play = document.getElementById('btn-play');
+    const pause = document.getElementById('btn-pause');
+    const resume = document.getElementById('btn-resume');
+    if (state === 'playing') { play.classList.add('hidden'); pause.classList.remove('hidden'); resume.classList.add('hidden'); }
+    else if (state === 'paused') { play.classList.add('hidden'); pause.classList.add('hidden'); resume.classList.remove('hidden'); }
+    else { play.classList.remove('hidden'); pause.classList.add('hidden'); resume.classList.add('hidden'); }
 }
 
-function renderAnalytics() {
-    const list = document.getElementById('dict-list');
-    list.innerHTML = vocabulary.map(word => `
-        <div class="card p-4 rounded-2xl font-bold flex justify-between items-center group hover:border-indigo-500 transition">
-            <span class="uppercase text-xs tracking-tight">${word}</span>
-            <button onclick="speakWord('${word}')" class="opacity-20 group-hover:opacity-100">🔊</button>
-        </div>
-    `).join('');
-}
-
+// ПРАКТИКА
 function startVocabularyQuiz() {
-    if(!vocabulary.length) return;
+    const content = document.getElementById('quiz-content');
+    const empty = document.getElementById('quiz-empty');
+    if(!vocabulary.length) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+    content.classList.remove('hidden'); empty.classList.add('hidden');
     document.getElementById('quiz-word').innerText = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-    document.getElementById('quiz-input').value = "";
+    document.getElementById('quiz-input').value = ""; document.getElementById('quiz-input').focus();
 }
 
 async function checkVocabularyWord() {
     const word = document.getElementById('quiz-word').innerText;
     const val = document.getElementById('quiz-input').value.trim().toLowerCase();
-    const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${word}`);
-    const d = await r.json();
-    const correct = d[0][0][0].toLowerCase();
-    if(val === correct || correct.includes(val)) {
-        showToast("Brilliant! 🎉");
-        setTimeout(startVocabularyQuiz, 800);
-    } else showToast(`Actually, it is: ${correct}`);
+    if(!val) return;
+    try {
+        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${word}`);
+        const d = await r.json();
+        const correct = d[0][0][0].toLowerCase();
+        if(val === correct || correct.includes(val)) { showToast("Correct! 🎉"); setTimeout(startVocabularyQuiz, 1000); }
+        else { showToast(`Wrong. It's: ${correct}`); }
+    } catch(e) { showToast("Error"); }
+}
+
+function saveWord(w) {
+    if(!w || w.length < 2) return;
+    if(!vocabulary.includes(w)) { vocabulary.push(w); localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary)); updateUI(); showToast(`Saved: ${w}`); }
 }
 
 function addWordManually() {
-    const input = document.getElementById('manual-word-input');
-    const word = input.value.trim().toLowerCase().replace(/[^a-z]/g, '');
-    if(word.length > 1 && !vocabulary.includes(word)) {
-        vocabulary.push(word);
-        localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary));
-        updateUI(); renderAnalytics();
-        input.value = "";
-        showToast("Word added!");
-    }
+    const val = document.getElementById('manual-word-input').value.trim().toLowerCase().replace(/[^a-z]/g, '');
+    if(val.length > 1) { vocabulary.push(val); localStorage.setItem('ef_vocabulary', JSON.stringify(vocabulary)); updateUI(); renderAnalytics(); document.getElementById('manual-word-input').value = ""; }
 }
 
 function loadVoices() {
@@ -170,23 +152,9 @@ function loadVoices() {
     if(s) s.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
 }
 
-function toggleTheme() {
-    const d = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('ef_theme', d ? 'dark' : 'light');
-    document.getElementById('theme-toggle').innerText = d ? '🌙' : '☀️';
-}
-
-function updateUI() {
-    document.querySelectorAll('#dict-count-nav, #dict-count-main').forEach(el => el.innerText = vocabulary.length);
-}
-
-function showToast(m) {
-    const t = document.getElementById('toast');
-    t.innerText = m; t.classList.remove('opacity-0');
-    setTimeout(() => t.classList.add('opacity-0'), 2000);
-}
-
-function speakWord(w) {
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(w));
+function updateUI() { document.querySelectorAll('#dict-count-nav, #dict-count-main').forEach(el => el.innerText = vocabulary.length); }
+function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }
+function toggleTheme() { const d = document.documentElement.classList.toggle('dark'); localStorage.setItem('ef_theme', d ? 'dark' : 'light'); }
+function renderAnalytics() {
+    document.getElementById('dict-list').innerHTML = vocabulary.map(word => `<div class="card p-4 rounded-xl font-bold uppercase text-xs flex justify-between items-center">${word} <button onclick="window.speechSynthesis.speak(new SpeechSynthesisUtterance('${word}'))">🔊</button></div>`).join('');
 }
