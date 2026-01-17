@@ -27,6 +27,11 @@ const stories = [
     { title: "Remote Work", cat: "Work", lvl: "Medium", text: "Many people now work from home using the internet. This offers flexibility but requires good time management skills." },
     { title: "Startup Culture", cat: "Work", lvl: "Hard", text: "Startups are small companies designed to grow fast. They often have informal offices but require long hours and hard work." },
 
+    // LIFESTYLE
+    // LIFESTYLE
+    { title: "Morning Routine", cat: "Life", lvl: "Easy", text: "Having a good morning routine can help you stay productive. Many people start their day with a glass of water and exercise." },
+    { title: "Benefits of Tea", cat: "Life", lvl: "Easy", text: "Tea is the most popular drink in the world after water. Green tea is known for having many antioxidants that are good for health." }
+    
     // COOKING
     { title: "Cooking Pasta", cat: "Cooking", lvl: "Easy", text: "To cook pasta, boil water with a little salt. Add the pasta and cook for ten minutes. Serve with your favorite sauce." },
     { title: "Baking Bread", cat: "Cooking", lvl: "Medium", text: "Making bread requires flour, water, yeast, and salt. You must knead the dough and let it rise before baking in a hot oven." }
@@ -70,26 +75,25 @@ function renderLibrary() {
 }
 
 function openStory(s) {
-    // Сначала переключаемся на страницу Home
-    showPage('home');
-    
-    // Скрываем приветствие и показываем ридер
+    // 1. Сначала переключаем страницу на 'home'
+    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+    document.getElementById('page-home').classList.remove('hidden');
+
+    // 2. Скрываем приветствие и ПОКАЗЫВАЕМ ридер
     document.getElementById('home-welcome').classList.add('hidden');
     document.getElementById('reader-ui').classList.remove('hidden');
-    
-    // Наполняем данными
+
+    // 3. Заполняем контент
     document.getElementById('story-title').innerText = s.title;
     document.getElementById('story-meta').innerText = `${s.cat} • ${s.lvl}`;
     
     const box = document.getElementById('story-text');
     box.innerHTML = "";
     
-    let pos = 0;
-    // Разбиваем текст на слова для кликабельности
     s.text.split(/(\s+)/).forEach(part => {
         if (part.trim().length > 0) {
             const span = document.createElement('span');
-            span.className = "word-span";
+            span.className = "word-span hover:text-indigo-500 cursor-pointer transition";
             span.innerText = part;
             span.onclick = () => saveWord(part.toLowerCase().replace(/[^a-z]/g, ''));
             box.appendChild(span);
@@ -97,8 +101,9 @@ function openStory(s) {
             box.appendChild(document.createTextNode(part));
         }
     });
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 async function saveWord(w) {
     if (w.length < 2) return;
     window.open(`https://context.reverso.net/translation/english-russian/${w}`, '_blank');
@@ -155,15 +160,12 @@ function checkAnswer(btn, selected, correct) {
     }
 }
 
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 function showPage(id) {
-    // Остановить озвучку при переходе на любую страницу
-    stop();
-    
+    stop(); // Остановить озвучку
     document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
     document.getElementById(`page-${id}`).classList.remove('hidden');
 
-    // Если переходим на Home вручную (через меню), показываем приветствие и скрываем ридер
+    // Если жмем на Home из меню - показываем приветствие
     if (id === 'home') {
         document.getElementById('home-welcome').classList.remove('hidden');
         document.getElementById('reader-ui').classList.add('hidden');
@@ -171,7 +173,7 @@ function showPage(id) {
     
     if (id === 'practice') runQuiz();
     if (id === 'profile') renderVocab();
-    
+}
     // Скролл в начало страницы
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -199,5 +201,6 @@ function renderVocab() {
         </div>
     `).join('');
 }
+
 
 
