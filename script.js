@@ -1,130 +1,69 @@
-const storyDatabase = [
-    // --- HISTORY ---
-    { id: "hist-a-1", cat: "History", level: "A", title: "The Great Wall", text: "The Great Wall of China is very long. It was built many years ago to protect the country. Thousands of people worked on it. Today, many tourists visit this place to walk on the stones." },
-    { id: "hist-b-1", cat: "History", level: "B", title: "Industrial Revolution", text: "The Industrial Revolution began in Great Britain in the late 1700s. It was a time when goods started being made by machines. This change led to the growth of cities and transformed the global economy." },
-    { id: "hist-c-1", cat: "History", level: "C", title: "The Fall of Rome", text: "Historians debate the primary causes of the Roman Empire's decline. Factors included military overexpansion, political instability, and economic disruption. The complex interplay eventually led to total collapse." },
-    
-    // --- BUSINESS ---
-    { id: "biz-a-1", cat: "Business", level: "A", title: "Small Shop", text: "John has a small shop. He sells coffee and tea. Many people come to his shop in the morning. He is happy because his business is good and customers are friendly." },
-    { id: "biz-c-1", cat: "Business", level: "C", title: "Market Disruption", text: "Market disruption occurs when a smaller company with fewer resources is able to challenge established businesses. By focusing on overlooked segments, they redefine industry standards." },
-
-    // --- PSYCHOLOGY ---
-    { id: "psy-b-1", cat: "Psychology", level: "B", title: "Power of Habit", text: "Habits are small actions we do every day. It takes about 66 days to form a new habit. If you want to change your life, start with a small goal like exercising for ten minutes." },
-    { id: "psy-c-1", cat: "Psychology", level: "C", title: "Cognitive Dissonance", text: "Cognitive dissonance is the mental discomfort experienced by a person who holds contradictory beliefs. To reduce tension, individuals often change their attitudes or justify behaviors." },
-
-    // --- SLANG ---
-    { id: "sla-a-1", cat: "Slang", level: "A", title: "Fun Idioms", text: "When something is very easy, we say it is a piece of cake. If you are happy, you are on cloud nine. These expressions make your English sound natural." },
-    { id: "sla-c-1", cat: "Slang", level: "C", title: "Modern Slang", text: "Digital communication has birthed terms like ghosting. When something is excellent, Gen Z might call it fire or slay. Understanding these nuances is vital for modern social media." },
-
-    // --- SPACE ---
-    { id: "spa-b-1", cat: "Space", level: "B", title: "Solar System", text: "Our solar system has eight planets. Mars is the Red Planet, while Jupiter is the largest. Saturn has rings made of ice. Scientists use telescopes to explore distant worlds." }
+const stories = [
+    { title: "The Sahara Desert", cat: "Geography", lvl: "Medium", text: "The Sahara is the world's largest hot desert. It covers most of North Africa. The landscape features massive sand dunes and rocky plateaus. Temperatures can be extreme, reaching over fifty degrees during the day." },
+    { title: "Pacific Islands", cat: "Geography", lvl: "Medium", text: "There are thousands of islands in the Pacific Ocean. Many were formed by volcanoes. They have tropical climates and unique wildlife that cannot be found anywhere else on Earth." },
+    { title: "Grand Canyon", cat: "Geography", lvl: "Easy", text: "The Grand Canyon is in Arizona, USA. It was carved by the Colorado River over millions of years. It is famous for its colorful rock layers and incredible size." },
+    { title: "Icelandic Glaciers", cat: "Geography", lvl: "Medium", text: "Iceland is known as the land of fire and ice. It has many glaciers and active volcanoes. Scientists visit Iceland to study how ice moves and how it affects our planet's climate." },
+    { title: "African Savanna", cat: "Geography", lvl: "Easy", text: "The savanna is a large grassland in Africa. It is home to many famous animals like lions, elephants, and zebras. There are two seasons: the dry season and the rainy season." },
+    { title: "The Alps", cat: "Geography", lvl: "Medium", text: "The Alps are the highest mountain range in Europe. They stretch across eight countries. People love to visit the Alps for skiing in winter and hiking in the summer." },
+    { title: "Rivers of Europe", cat: "Geography", lvl: "Easy", text: "Europe has many important rivers like the Danube and the Rhine. These rivers are used for transport and provide water to many large cities across the continent." },
+    { title: "Lion King", cat: "Animals", lvl: "Easy", text: "The lion is known as the king of the jungle. They live in groups called prides. Male lions have beautiful manes, while females do most of the hunting for the family." },
+    { title: "Cooking Pasta", cat: "Cooking", lvl: "Easy", text: "Italian pasta is easy to cook. You need boiling water and salt. Boil the pasta for ten minutes until it is soft. Serve it with tomato sauce and fresh cheese." }
 ];
 
-const CATEGORIES = [
-    { name: "History", icon: "🏛️" }, { name: "Technology", icon: "💻" },
-    { name: "Science", icon: "🧪" }, { name: "Nature", icon: "🌿" },
-    { name: "Business", icon: "📈" }, { name: "Culture", icon: "🎨" },
-    { name: "Psychology", icon: "🧠" }, { name: "Space", icon: "🚀" },
-    { name: "Health", icon: "🍎" }, { name: "Slang", icon: "💬" }
-];
-
-const LEVELS = [
-    { id: "A", label: "Level A", desc: "Beginner" },
-    { id: "B", label: "Level B", desc: "Intermediate" },
-    { id: "C", label: "Level C", desc: "Advanced" }
-];
-
-let vocab = JSON.parse(localStorage.getItem('ef_final')) || [];
-let currentCat = null;
-let currentLvl = null;
-let voices = [];
+let vocab = JSON.parse(localStorage.getItem('ef_v20')) || [];
+let currentCategory = 'All';
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.speechSynthesis.onvoiceschanged = () => {
-        voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('en'));
-        const sel = document.getElementById('voice-select');
-        if (sel) sel.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
-    };
-    renderCats();
+    renderCategoryNav();
+    renderLibrary();
     updateCount();
 });
 
-function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.theme = isDark ? 'dark' : 'light';
-}
-
-function showPage(id) {
-    stop();
-    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-    document.getElementById(`page-${id}`).classList.remove('hidden');
-    if (id === 'practice') runQuiz();
-    if (id === 'profile') renderVocab();
-}
-
-function renderCats() {
-    hideSteps();
-    updateBreadcrumb("All Categories");
-    const grid = document.getElementById('cat-grid');
-    grid.classList.remove('hidden');
-    grid.innerHTML = CATEGORIES.map(c => `
-        <div class="story-card !text-left group" onclick="chooseCat('${c.name}')">
-            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">${c.icon}</div>
-            <h4 class="text-2xl font-black uppercase italic">${c.name}</h4>
-        </div>
+// НАВИГАЦИЯ КАТЕГОРИЙ
+function renderCategoryNav() {
+    const cats = ['All', ...new Set(stories.map(s => s.cat))];
+    const nav = document.getElementById('cat-nav');
+    nav.innerHTML = cats.map(c => `
+        <button onclick="filterCat('${c}')" class="cat-btn ${currentCategory === c ? 'active' : ''}">${c}</button>
     `).join('');
 }
 
-function chooseCat(cat) {
-    currentCat = cat;
-    hideSteps();
-    updateBreadcrumb(`All Categories > ${cat}`);
-    const sel = document.getElementById('level-selection');
-    sel.classList.remove('hidden');
-    document.getElementById('level-grid').innerHTML = LEVELS.map(l => `
-        <div class="story-card !p-12 border-b-4 border-b-transparent hover:border-b-indigo-500" onclick="chooseLvl('${l.id}')">
-            <div class="text-3xl font-black text-indigo-500 mb-2">${l.id}</div>
-            <h4 class="text-lg font-bold uppercase">${l.label}</h4>
-        </div>
-    `).join('');
+function filterCat(c) {
+    currentCategory = c;
+    renderCategoryNav();
+    renderLibrary();
 }
 
-function chooseLvl(lvl) {
-    currentLvl = lvl;
-    hideSteps();
-    updateBreadcrumb(`All Categories > ${currentCat} > ${lvl}`);
-    const sel = document.getElementById('stories-selection');
-    sel.classList.remove('hidden');
-    const filtered = storyDatabase.filter(s => s.cat === currentCat && s.level === lvl);
-    document.getElementById('final-stories-grid').innerHTML = filtered.length ? filtered.map(s => `
-        <div class="story-card !p-6 flex flex-col justify-between min-h-[160px]" onclick='openStory(${JSON.stringify(s)})'>
-            <h5 class="font-bold text-sm">${s.title}</h5>
-            <div class="text-[9px] font-black text-indigo-500 uppercase mt-4">Read Now →</div>
+// РЕНДЕР БИБЛИОТЕКИ (ВИД КАК НА СКРИНШОТЕ)
+function renderLibrary() {
+    const grid = document.getElementById('lib-grid');
+    const filtered = currentCategory === 'All' ? stories : stories.filter(s => s.cat === currentCategory);
+    
+    grid.innerHTML = filtered.map(s => `
+        <div class="story-card" onclick='openStory(${JSON.stringify(s)})'>
+            <div class="card-meta">${s.cat} • ${s.lvl}</div>
+            <h4 class="card-title">${s.title}</h4>
         </div>
-    `).join('') : `<div class="col-span-full py-20 opacity-30 font-bold text-center">No texts yet. Try another level!</div>`;
+    `).join('');
 }
 
 function openStory(s) {
     showPage('home');
-    document.getElementById('home-empty').classList.add('hidden');
-    document.getElementById('reader-ui').classList.remove('hidden');
     document.getElementById('story-title').innerText = s.title;
-    document.getElementById('story-meta').innerText = `${s.cat} | ${s.level}`;
-    window.currentTxt = s.text;
     const box = document.getElementById('story-text');
     box.innerHTML = "";
+    
     let pos = 0;
     s.text.split(/(\s+)/).forEach(part => {
         if (part.trim().length > 0) {
             const span = document.createElement('span');
             span.className = "word-span";
             span.innerText = part;
-            span.dataset.start = pos;
-            span.dataset.end = pos + part.length;
             span.onclick = () => saveWord(part.toLowerCase().replace(/[^a-z]/g, ''));
             box.appendChild(span);
-        } else { box.appendChild(document.createTextNode(part)); }
-        pos += part.length;
+        } else {
+            box.appendChild(document.createTextNode(part));
+        }
     });
 }
 
@@ -137,62 +76,89 @@ async function saveWord(w) {
         const tr = d[0][0][0].toLowerCase();
         if (!vocab.find(v => v.w === w)) {
             vocab.push({ w, tr });
-            localStorage.setItem('ef_final', JSON.stringify(vocab));
+            localStorage.setItem('ef_v20', JSON.stringify(vocab));
             updateCount();
-            toast(`Saved: ${w}`);
+            showToast(`Saved: ${w}`);
         }
     } catch(e) {}
 }
 
+// ПРАКТИКА (ИСПРАВЛЕННАЯ)
+function runQuiz() {
+    const active = document.getElementById('quiz-active');
+    const none = document.getElementById('quiz-none');
+    
+    if (vocab.length < 4) {
+        active.classList.add('hidden');
+        none.classList.remove('hidden');
+        return;
+    }
+    
+    active.classList.remove('hidden');
+    none.classList.add('hidden');
+
+    const correct = vocab[Math.floor(Math.random() * vocab.length)];
+    document.getElementById('quiz-word').innerText = correct.w;
+
+    let options = [correct.tr];
+    while(options.length < 4) {
+        let randomTr = vocab[Math.floor(Math.random() * vocab.length)].tr;
+        if (!options.includes(randomTr)) options.push(randomTr);
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    document.getElementById('quiz-options').innerHTML = options.map(o => `
+        <button class="opt-btn" onclick="checkAnswer(this, '${o}', '${correct.tr}')">${o}</button>
+    `).join('');
+}
+
+function checkAnswer(btn, selected, correct) {
+    if (selected === correct) {
+        btn.style.borderColor = '#10b981';
+        btn.style.color = '#10b981';
+        setTimeout(runQuiz, 800);
+    } else {
+        btn.style.borderColor = '#ef4444';
+        btn.style.color = '#ef4444';
+    }
+}
+
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+function showPage(id) {
+    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+    document.getElementById(`page-${id}`).classList.remove('hidden');
+    if (id === 'practice') runQuiz();
+    if (id === 'profile') renderVocab();
+}
+
 function speak() {
-    stop();
-    window.isReading = true;
-    const ut = new SpeechSynthesisUtterance(window.currentTxt);
-    const sel = document.getElementById('voice-select');
-    if (voices[sel.value]) ut.voice = voices[sel.value];
-    ut.rate = 0.85;
-    ut.onboundary = (e) => {
-        if (!window.isReading || e.name !== 'word') return;
-        const char = e.charIndex;
-        document.querySelectorAll('.word-span').forEach(s => {
-            const start = parseInt(s.dataset.start), end = parseInt(s.dataset.end);
-            if (char >= start && char < end) {
-                s.classList.add('reading-now');
-                s.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else { s.classList.remove('reading-now'); }
-        });
-    };
-    ut.onend = () => { window.isReading = false; clearH(); };
+    const text = document.getElementById('story-text').innerText;
+    window.speechSynthesis.cancel();
+    const ut = new SpeechSynthesisUtterance(text);
+    ut.rate = 0.8;
     window.speechSynthesis.speak(ut);
 }
 
-function stop() { window.speechSynthesis.cancel(); window.isReading = false; clearH(); }
-function clearH() { document.querySelectorAll('.reading-now').forEach(e => e.classList.remove('reading-now')); }
+function stop() { window.speechSynthesis.cancel(); }
 
-function searchStories() {
-    const q = document.getElementById('lib-search').value.toLowerCase();
-    const res = document.getElementById('search-results');
-    if (q.length < 2) { res.classList.add('hidden'); return; }
-    const matches = storyDatabase.filter(s => s.title.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q)).slice(0, 5);
-    res.classList.remove('hidden');
-    res.innerHTML = matches.map(s => `<div class="p-4 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer" onclick='openStory(${JSON.stringify(s)})'>
-        <div class="text-[8px] font-black text-indigo-500 uppercase">${s.cat}</div><div class="font-bold">${s.title}</div></div>`).join('');
+function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.theme = isDark ? 'dark' : 'light';
 }
 
-function updateBreadcrumb(path) { document.getElementById('breadcrumb').innerText = path; }
-function hideSteps() { document.getElementById('cat-grid').classList.add('hidden'); document.getElementById('level-selection').classList.add('hidden'); document.getElementById('stories-selection').classList.add('hidden'); }
 function updateCount() { document.getElementById('v-count').innerText = vocab.length; }
-function toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }
-function runQuiz() {
-    const act = document.getElementById('quiz-active'), none = document.getElementById('quiz-none');
-    if (vocab.length < 4) { act.classList.add('hidden'); none.classList.remove('hidden'); return; }
-    act.classList.remove('hidden'); none.classList.add('hidden');
-    const cur = vocab[Math.floor(Math.random() * vocab.length)];
-    document.getElementById('quiz-word').innerText = cur.w;
-    let ops = [cur.tr];
-    while(ops.length < 4) { let r = vocab[Math.floor(Math.random() * vocab.length)].tr; if (!ops.includes(r)) ops.push(r); }
-    ops.sort(() => Math.random() - 0.5);
-    document.getElementById('quiz-options').innerHTML = ops.map(o => `<button class="opt-btn" onclick="check(this, '${o}', '${cur.tr}')">${o}</button>`).join('');
+
+function showToast(m) {
+    const t = document.getElementById('toast');
+    t.innerText = m; t.style.opacity = "1";
+    setTimeout(() => t.style.opacity = "0", 2000);
 }
-function check(btn, val, cor) { if (val === cor) { btn.style.background = '#10b981'; btn.style.color = 'white'; setTimeout(runQuiz, 1000); } else { btn.style.background = '#ef4444'; btn.style.color = 'white'; } }
-function renderVocab() { document.getElementById('vocab-list').innerHTML = vocab.map(v => `<div class="bg-white dark:bg-white/5 p-6 rounded-2xl border border-slate-100 dark:border-white/5 text-center"><div class="font-black text-[#5d5fef] uppercase text-xs">${v.w}</div><div class="text-[10px] opacity-40 uppercase">${v.tr}</div></div>`).join(''); }
+
+function renderVocab() {
+    document.getElementById('vocab-list').innerHTML = vocab.map(v => `
+        <div class="bg-white dark:bg-white/5 p-6 rounded-2xl shadow-sm text-center border border-slate-50 dark:border-white/5">
+            <div class="font-bold text-[#5d5fef]">${v.w}</div>
+            <div class="text-[10px] uppercase opacity-40 font-bold mt-1">${v.tr}</div>
+        </div>
+    `).join('');
+}
