@@ -1,42 +1,209 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+let vocabulary = JSON.parse(localStorage.getItem('ef_v7')) || [];
+let voices = [];
+let currentText = "";
+let isReading = false;
 
-body { font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
+const libraryDB = [
+    { cat: 'Geography', title: 'The Great Plains', level: 'Easy', text: 'The Great Plains are a broad expanse of flat land. Much of it is covered in prairie, steppe, and grassland.' },
+    { cat: 'Geography', title: 'The Amazon River', level: 'Medium', text: 'The Amazon River is the largest river by discharge volume in the world. It flows through South America.' },
+    { cat: 'Animals', title: 'African Lions', level: 'Medium', text: 'Lions are large cats that live in groups called prides. They are apex predators at the top of the food chain.' },
+    { cat: 'Science', title: 'Black Holes', level: 'Hard', text: 'A black hole is a region of spacetime where gravity is so strong that nothing can escape.' },
+    { cat: 'Science', title: 'Space Travel', level: 'Hard', text: 'Future missions to Mars will require advanced propulsion systems and protection from cosmic radiation.' }
+];
 
-/* КНОПКИ КАТЕГОРИЙ */
-.cat-btn {
-    padding: 10px 16px; border-radius: 12px; font-size: 10px; font-weight: 800;
-    text-transform: uppercase; border: 1px solid #e2e8f0; opacity: 0.6; color: inherit;
+document.addEventListener('DOMContentLoaded', () => {
+    // Ждем загрузки голосов (важно для Chrome)
+    window.speechSynthesis.onvoiceschanged = () => {
+        loadVoices();
+    };
+    loadVoices();
+    updateUI();
+    filterLib('all');
+});
+
+function loadVoices() {
+    let allVoices = window.speechSynthesis.getVoices();
+    if (allVoices.length === 0) return; // Голоса еще не готовы
+    
+    voices = allVoices.filter(v => v.lang.includes('en'));
+    voices.sort((a,b) => b.name.includes('Google') - a.name.includes('Google'));
+
+    const s = document.getElementById('voice-select');
+    if(s) {
+        s.innerHTML = voices.map((v, i) => `<option value="${i}">${v.name}</option>`).join('');
+    }
 }
-.dark .cat-btn { border-color: #1e293b; color: #fff; }
-.cat-btn.active { background: #6366f1; color: #fff !important; opacity: 1; border-color: #6366f1; }
 
-/* КАРТОЧКИ В БИБЛИОТЕКЕ */
-.topic-card {
-    padding: 2.5rem 1.5rem; border-radius: 1.5rem; border: 1px solid #e2e8f0;
-    cursor: pointer; transition: all 0.3s ease; background: #fff; text-align: center;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.dark .topic-card { background: #0f172a; border-color: #1e293b; color: #fff; }
-.topic-card:hover { transform: translateY(-8px); border-color: #6366f1; box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.4); }
-
-.word-span { cursor: pointer; transition: 0.1s; padding: 2px 4px; border-radius: 6px; display: inline-block; }
-
-/* ПОДСВЕТКА */
-.word-reading {
-    background-color: #6366f1 !important;
-    color: #fff !important;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
-    transform: scale(1.05);
+function showPage(id) {
+    stopText();
+    document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+    document.getElementById('page-' + id).classList.remove('hidden');
+    if(id === 'practice') startVocabularyQuiz();
+    if(id === 'profile') renderAnalytics();
 }
 
-/* КНОПКИ В ТЕСТЕ */
-.option-btn {
-    padding: 1.25rem; border-radius: 1rem; border: 2px solid #e2e8f0;
-    font-weight: 800; transition: 0.2s; text-align: center; background: transparent; color: inherit;
+function filterLib(cat) {
+    const grid = document.getElementById('library-grid');
+    grid.innerHTML = "";
+    const filtered = cat === 'all' ? libraryDB : libraryDB.filter(i => i.cat === cat);
+    
+    filtered.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "topic-card";
+        div.onclick = () => openTopic(item);
+        div.innerHTML = `
+            <div class="text-[10px] opacity-50 uppercase font-black mb-2 tracking-widest">${item.cat}</div>
+            <h4 class="font-extrabold text-lg leading-tight">${item.title}</h4>
+            <div class="mt-4 text-[9px] font-bold py-1 px-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full uppercase">${item.level}</div>
+        `;
+        grid.appendChild(div);
+    });
 }
-.dark .option-btn { border-color: #1e293b; background: #1e293b; color: #fff; }
-.option-btn:hover { border-color: #6366f1; background: #6366f110; }
-.option-btn.correct { background: #10b981 !important; border-color: #10b981 !important; color: #fff !important; }
-.option-btn.wrong { background: #ef4444 !important; border-color: #ef4444 !important; color: #fff !important; }
 
-.page-content.hidden { display: none; }
+function openTopic(item) {
+    showPage('home');
+    document.getElementById('home-placeholder').classList.add('hidden');
+    document.getElementById('ai-result').classList.remove('hidden');
+    document.getElementById('res-title').innerText = item.title;
+    currentText = item.text;
+    const container = document.getElementById('res-text');
+    container.innerHTML = "";
+    
+    let charPos = 0;
+    item.text.split(/(\s+)/).forEach((part) => {
+        if (part.trim().length > 0) {
+            const span = document.createElement('span');
+            span.className = "word-span";
+            span.dataset.start = charPos;
+            span.dataset.end = charPos + part.length;
+            span.innerText = part;
+            
+            const sentence = item.text.split(/[.!?]/).find(s => s.includes(part)) || item.text;
+            span.onclick = () => saveWord(part.toLowerCase().replace(/[^a-z]/g, ''), sentence);
+            
+            container.appendChild(span);
+        } else {
+            container.appendChild(document.createTextNode(part));
+        }
+        charPos += part.length;
+    });
+}
+
+function speakText() {
+    stopText();
+    if (!currentText) return;
+    isReading = true;
+    
+    const ut = new SpeechSynthesisUtterance(currentText);
+    const vIdx = document.getElementById('voice-select').value;
+    if (voices[vIdx]) ut.voice = voices[vIdx];
+    
+    ut.rate = 0.85;
+
+    ut.onboundary = (e) => {
+        if (!isReading || e.name !== 'word') return;
+        const charIdx = e.charIndex;
+        const spans = document.querySelectorAll('.word-span');
+        
+        spans.forEach(span => {
+            const start = parseInt(span.dataset.start);
+            const end = parseInt(span.dataset.end);
+            if (charIdx >= start && charIdx < end) {
+                span.classList.add('word-reading');
+                span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                span.classList.remove('word-reading');
+            }
+        });
+    };
+
+    ut.onend = () => { isReading = false; clearHighlight(); };
+    window.speechSynthesis.speak(ut);
+}
+
+function stopText() {
+    window.speechSynthesis.cancel();
+    isReading = false;
+    clearHighlight();
+}
+
+function clearHighlight() {
+    document.querySelectorAll('.word-reading').forEach(el => el.classList.remove('word-reading'));
+}
+
+async function saveWord(w, context) {
+    if(w.length < 2) return;
+    try {
+        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(w)}`);
+        const d = await r.json();
+        const trans = d[0][0][0].toLowerCase();
+        
+        if(!vocabulary.find(v => v.word === w)) {
+            vocabulary.push({ word: w, translation: trans, context: context.trim() });
+            localStorage.setItem('ef_v7', JSON.stringify(vocabulary));
+            updateUI();
+            showToast(`Saved: ${w} - ${trans}`);
+        }
+    } catch(e) { showToast("Error connecting to Translate"); }
+}
+
+function startVocabularyQuiz() {
+    const content = document.getElementById('quiz-content'), empty = document.getElementById('quiz-empty');
+    if(vocabulary.length < 4) { content.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+    content.classList.remove('hidden'); empty.classList.add('hidden');
+    
+    const current = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+    document.getElementById('quiz-word').innerText = current.word;
+    document.getElementById('quiz-hint').innerText = `"${current.context.replace(new RegExp(current.word, 'gi'), '____')}"`;
+    
+    let opts = [current.translation];
+    while(opts.length < 4) {
+        let r = vocabulary[Math.floor(Math.random() * vocabulary.length)].translation;
+        if(!opts.includes(r)) opts.push(r);
+    }
+    opts.sort(() => Math.random() - 0.5);
+    
+    const container = document.getElementById('quiz-options');
+    container.innerHTML = "";
+    opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "option-btn";
+        btn.innerText = opt;
+        btn.onclick = () => {
+            if(opt === current.translation) {
+                btn.classList.add('correct');
+                showToast("Correct! ✨");
+                setTimeout(startVocabularyQuiz, 1000);
+            } else {
+                btn.classList.add('wrong');
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+
+function renderAnalytics() {
+    document.getElementById('dict-list').innerHTML = vocabulary.map(v => `
+        <div class="topic-card !p-6 !text-left !items-start">
+            <div class="flex justify-between w-full mb-2">
+                <span class="font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-tighter">${v.word}</span>
+                <button onclick="speakWord('${v.word}')" class="text-xs">🔊</button>
+            </div>
+            <div class="font-bold text-sm mb-2 opacity-80">${v.translation}</div>
+            <div class="text-[10px] opacity-40 italic leading-snug">${v.context}</div>
+        </div>
+    `).join('');
+}
+
+function speakWord(w) {
+    window.speechSynthesis.cancel();
+    const ut = new SpeechSynthesisUtterance(w);
+    const vIdx = document.getElementById('voice-select').value;
+    if (voices[vIdx]) ut.voice = voices[vIdx];
+    ut.rate = 0.8;
+    window.speechSynthesis.speak(ut);
+}
+
+function toggleTheme() { document.documentElement.classList.toggle('dark'); }
+function updateUI() { document.querySelectorAll('#dict-count-nav').forEach(el => el.innerText = vocabulary.length); }
+function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0'); setTimeout(() => t.classList.add('opacity-0'), 2000); }
